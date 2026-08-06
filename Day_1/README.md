@@ -1,18 +1,19 @@
+
 # Day 1 – Exploring Verilog RTL Design Through Simulation
 
 ## Experiment Objective
 
-The objective of this experiment was to understand the fundamentals of **Register Transfer Level (RTL) design** using **Verilog**. The experiment also focused on learning how to compile and simulate Verilog designs using **Icarus Verilog (iverilog)** and verify the output through waveform analysis in **GTKWave**. A **2-to-1 Multiplexer** was implemented to understand the complete simulation process.
+The objective of this experiment was to understand the fundamentals of Register Transfer Level (RTL) design using **Verilog**. The experiment also focused on learning how to compile and simulate Verilog designs using **Icarus Verilog (iverilog)** and verify the output through waveform analysis in **GTKWave**. A **2-to-1 Multiplexer** was implemented to understand the complete simulation process.
 
 ---
 
 ##  Contents
 
-- [Digital Design Verification](#digital-design-verification)
-- [Simulation Workflow with Icarus Verilog](#simulation-workflow-with-icarus-verilog)
-- [Practical Exercise – Simulating a 2:1 Multiplexer](#practical-exercise--simulating-a-21-multiplexer)
-- [Multiplexer Design Explanation](#multiplexer-design-explanation)
-- [Conclusion](#conclusion)
+- Digital Design Verification
+- Simulation Workflow with Icarus Verilog
+- Practical Exercise – Simulating a 2:1 Multiplexer
+- Multiplexer Design Explanation
+- Conclusion
 
 ---
 
@@ -34,7 +35,8 @@ The **design** is the Verilog module that represents the digital circuit to be i
 
 A **testbench** is a dedicated verification module written to test the functionality of a design. It applies different combinations of input signals, monitors the resulting outputs, and helps confirm that the design performs according to its intended behavior.
 
-![Testbench](images/testbench.png)
+
+<img width="606" height="285" alt="testbench" src="https://github.com/user-attachments/assets/8f3425fa-8804-4b28-b919-38ae2d3fdfc4" />
 
 ---
 
@@ -58,7 +60,8 @@ GTKWave
 
 ### Simulation Flow Diagram
 
-![Simulation Flow](images/simflow.png)
+<img width="701" height="325" alt="simflow" src="https://github.com/user-attachments/assets/fcc78909-5229-4f89-b4c3-58c8cd441f4f" />
+
 
 ---
 
@@ -103,7 +106,7 @@ The waveform can now be analyzed using GTKWave.
 
 ### GTKWave Output
 
-![GTKWave Waveform](images/waveform.png)
+<img width="1920" height="1012" alt="waveform" src="https://github.com/user-attachments/assets/97c72225-1e60-4409-832a-bb0c5b3b51ae" />
 
 ---
 
@@ -151,7 +154,7 @@ endmodule
 
 ### Verilog Code Screenshot
 
-![Verilog Code](images/code.png)
+<img width="1920" height="1012" alt="code" src="https://github.com/user-attachments/assets/24df9d93-00c8-4e5e-8ee0-a331dfd32adf" />
 
 ---
 
