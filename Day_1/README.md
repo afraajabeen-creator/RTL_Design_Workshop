@@ -7,14 +7,19 @@ The objective of this experiment was to understand the fundamentals of Register 
 
 ---
 
-##  Contents
+## Contents
 
-- Digital Design Verification
-- Simulation Workflow with Icarus Verilog
-- Practical Exercise – Simulating a 2:1 Multiplexer
-- Multiplexer Design Explanation
-- Introduction to Yosys
-- Conclusion
+- [Digital Design Verification](#digital-design-verification)
+- [Simulation Workflow with Icarus Verilog](#2️⃣-simulation-workflow-with-icarus-verilog)
+- [Practical Exercise – Simulating a 2:1 Multiplexer](#3️⃣-practical-exercise--simulating-a-21-multiplexer)
+- [Multiplexer Design Explanation](#4️⃣-multiplexer-design-explanation)
+- [Introduction to Yosys](#5️⃣-introduction-to-yosys)
+- [RTL Design and Synthesis](#6️⃣-rtl-design-and-synthesis)
+- [Understanding the `.lib` File and Cell Flavors](#7️⃣-understanding-the-lib-file-and-cell-flavors)
+- [Launching Yosys and Synthesizing the Good Mux](#8️⃣-launching-yosys-and-synthesizing-the-good-mux)
+- [Synthesis Results and Gate-Level Representation](#9️⃣-synthesis-results-and-gate-level-representation)
+- [Generated Gate-Level Netlist](#🔟-generated-gate-level-netlist)
+- [Conclusion](#1️⃣1️⃣-conclusion)
 
 ---
 
@@ -191,13 +196,124 @@ write_verilog synthesized_mux.v
 
 The synthesized netlist is then verified using the testbench and **GTKWave**.
 
+
 <img width="705" height="416" alt="Screenshot 2026-08-08 222843" src="https://github.com/user-attachments/assets/c07f8c9e-fe0f-4822-881d-e827b5b9f352" />
 <img width="703" height="334" alt="Screenshot 2026-08-08 222858" src="https://github.com/user-attachments/assets/3eff0420-b3f9-4bb9-a830-da05794bb501" />
 
 
+---
 
-# 6️⃣ Conclusion
+# 6️⃣ RTL Design and Synthesis
 
-Through this experiment, I learned the basic RTL design flow using Verilog. I understood the purpose of a simulator, design, and testbench, successfully compiled and simulated a **2:1 Multiplexer** using **Icarus Verilog**, and verified the circuit's functionality using **GTKWave** and an introduction to **Yosys synthesis**. This experiment provided a strong foundation for further digital design experiments.
+After introducing Yosys, the next step was to understand how an **RTL design is transformed into a gate-level implementation** through synthesis.
+
+```text
+RTL Design
+    ↓
+  Yosys
+    ↓
+Gate-Level Netlist
+```
+
+### RTL vs Gate-Level Design
+
+| RTL Design | Gate-Level Design |
+|------------|-------------------|
+| Describes circuit functionality using Verilog. | Represents the circuit using library cells. |
+| Easier to understand and modify. | Represents the synthesized hardware structure. |
+| Used for RTL simulation. | Used for further implementation and verification. |
+<img width="520" height="279" alt="Screenshot 2026-08-09 013331" src="https://github.com/user-attachments/assets/493daa50-28dd-4198-8ae1-a87f09a4df55" />
+
+
+---
+
+# 7️⃣ Understanding the `.lib` File and Cell Flavors
+
+A **`.lib` (Liberty) file** contains information about the standard cells available in a particular technology library, including their functionality, timing, power, and other characteristics.
+
+Different versions of cells are available for different requirements.
+
+### Faster vs Slower Cells
+
+- **Faster cells** have lower delay and are useful for timing-critical paths.
+- **Slower cells** generally have lower power or area and can be used where high speed is not required.
+
+Using fast cells everywhere is unnecessary because not every path is timing-critical. Therefore, synthesis selects suitable cells based on factors such as **timing, power, and area**.
+
+---
+
+# 8️⃣ Launching Yosys and Synthesizing the Good Mux
+
+Yosys can be launched from the terminal using:
+
+```bash
+yosys
+```
+<img width="1920" height="146" alt="yosys launch" src="https://github.com/user-attachments/assets/bf0a0f76-6e89-4b5a-b1b6-3212990fe666" />
+
+
+The `good_mux` design was then synthesized using the following commands:
+
+```bash
+read_liberty -lib ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_verilog good_mux.v
+synth -top good_mux
+abc -liberty ../lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+write_verilog -noattr good_mux_net.v
+```
+
+### Command Meaning
+
+| Command | Purpose |
+|---------|---------|
+| `read_liberty` | Loads the technology library. |
+| `read_verilog` | Reads the Verilog RTL design. |
+| `synth -top` | Synthesizes the specified top module. |
+| `abc` | Performs technology mapping using the library. |
+| `write_verilog` | Generates the synthesized Verilog netlist. |
+
+---
+
+# 9️⃣ Synthesis Results and Gate-Level Representation
+
+After synthesis, Yosys provides statistics about the generated design, including information about its ports, wires, and cells.
+
+<img width="1920" height="401" alt="sysn statistics" src="https://github.com/user-attachments/assets/58e6f167-adfc-4a03-a277-e74cef4f5ee5" />
+
+
+The synthesized circuit can also be visualized using:
+
+```bash
+show
+```
+
+This displays a graphical representation of the synthesized gate-level design.
+
+<img width="1920" height="1012" alt="goodmux logic" src="https://github.com/user-attachments/assets/6f8ff5ca-6120-4441-835c-9d92a284c6a4" />
+
+---
+
+# 🔟 Generated Gate-Level Netlist
+
+The synthesized netlist was generated using:
+
+```bash
+write_verilog -noattr good_mux_net.v
+```
+
+It can be viewed using:
+
+```bash
+cat good_mux_net.v
+```
+
+The generated netlist represents the original RTL functionality using cells from the selected technology library.
+
+<img width="1920" height="1012" alt="main netlist" src="https://github.com/user-attachments/assets/97d85548-7fb2-4188-8316-5222ead5a96d" />
+
+---
+# 1️⃣1️⃣ Conclusion
+
+This experiment provided an overview of the **RTL-to-netlist design flow**. I learned how Verilog RTL is simulated using **Icarus Verilog** and analyzed with **GTKWave**, followed by synthesis using **Yosys**. I also understood the purpose of `.lib` files, different cell flavors, and the selection of cells based on timing, power, and area. Finally, I synthesized the `good_mux` design, examined the synthesis results, viewed its gate-level representation, and generated the synthesized Verilog netlist.
 
 ---
