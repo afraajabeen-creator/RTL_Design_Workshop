@@ -2,22 +2,22 @@
 
 Welcome to my **RTL Design Workshop** repository.
 
-This repository contains my learning progress, experiments, and documentation related to **Verilog RTL Design and Simulation**. Each day contains the concepts learned, practical experiments performed, simulation results, and observations.
+This repository documents my learning journey through **RTL design, Verilog simulation, and synthesis**. Each day contains the concepts explored, practical experiments, commands used, results, screenshots, and observations from the workshop.
 
 ---
 
 ## 📚 Workshop Progress
 
-| Day | Topic | Status |
-|-----|-------|--------|
-| Day 1 | Introduction to Verilog RTL Design & Simulation | ✅ Completed |
+| **Day** | **Topics Covered** | **Status** |
+|--------|---------------------|------------|
+| Day 1 | Verilog RTL Design, Icarus Verilog, GTKWave & Yosys Synthesis | ✅ Completed |
 
 ---
 
 ## 📂 Repository Structure
 
-```
-RTL_Workshop
+```text
+RTL_Design_Workshop
 │
 ├── README.md
 │
@@ -27,25 +27,33 @@ RTL_Workshop
 
 ---
 
-# Day 1 – Introduction to Verilog RTL Design & Simulation
+# Day 1 – RTL Design, Simulation & Synthesis
 
-In Day 1, I explored the fundamentals of **RTL design using Verilog** and learned the basic simulation workflow.
+Day 1 focused on understanding the basic **RTL design flow**, starting with Verilog simulation and progressing towards synthesis using Yosys.
 
 ### Topics Covered
 
-- Understanding Simulator, Design, and Testbench
-- Introduction to Icarus Verilog (iverilog)
-- Verilog simulation flow
-- Implementation and simulation of a 2:1 Multiplexer
-- Waveform analysis using GTKWave
+- Simulator, Design and Testbench
+- Icarus Verilog simulation
+- 2:1 Multiplexer implementation
+- GTKWave waveform analysis
+- RTL Design and Synthesis
+- Introduction to Yosys
+- Understanding `.lib` files
+- Faster and slower cell flavors
+- Cell selection based on design requirements
+- Yosys synthesis flow
+- Synthesis statistics
+- Gate-level representation
+- Generated gate-level netlist
 
 ---
 
 ## 🔗 Day 1 Documentation
 
-Detailed explanation, simulation steps, screenshots, and results are available here:
+The complete Day 1 experiment, including commands, explanations, screenshots, synthesis results, and observations:
 
-➡️ [Day 1 – Exploring Verilog RTL Design Through Simulation](./Day_1/README.md)
+➡️ [Day 1 – RTL Design, Simulation & Synthesis](./Day_1/README.md)
 
 ---
 
@@ -54,6 +62,9 @@ Detailed explanation, simulation steps, screenshots, and results are available h
 - Verilog
 - Icarus Verilog (iverilog)
 - GTKWave
+- Yosys
+- Linux / Ubuntu
+- Git & GitHub
 
 ---
 
