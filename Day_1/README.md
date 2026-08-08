@@ -13,6 +13,9 @@ The objective of this experiment was to understand the fundamentals of Register 
 - Simulation Workflow with Icarus Verilog
 - Practical Exercise – Simulating a 2:1 Multiplexer
 - Multiplexer Design Explanation
+- Introduction to Yosys
+- Yosys Setup
+- Synthesis Verification
 - Conclusion
 
 ---
@@ -157,9 +160,65 @@ endmodule
 <img width="1920" height="1012" alt="code" src="https://github.com/user-attachments/assets/24df9d93-00c8-4e5e-8ee0-a331dfd32adf" />
 
 ---
+---
 
-# 5️⃣ Conclusion
+# 5️⃣ Introduction to Yosys
 
-Through this experiment, I learned the basic RTL design flow using Verilog. I understood the purpose of a simulator, design, and testbench, successfully compiled and simulated a **2:1 Multiplexer** using **Icarus Verilog**, and verified the circuit's functionality using **GTKWave**. This experiment provided a strong foundation for further digital design experiments.
+**Yosys** is an open-source tool used for synthesizing Verilog RTL designs. It converts the RTL description into a **netlist**, which represents the hardware implementation.
+
+Basic flow:
+
+```text
+Verilog RTL
+     ↓
+   Yosys
+     ↓
+  Netlist
+```
+
+---
+
+# 6️⃣ Yosys Setup
+
+Yosys reads the Verilog design and the required technology library before performing synthesis.
+
+```bash
+read_verilog good_mux.v
+read_liberty -lib <library_path>.lib
+synth -top good_mux
+write_verilog synthesized_mux.v
+```
+
+### Yosys Flow
+
+<img width="701" alt="Yosys setup" src="PASTE_YOUR_FIRST_IMAGE_LINK_HERE" />
+
+---
+
+# 7️⃣ Synthesis Verification
+
+The synthesized **netlist** can be checked using the same testbench.
+
+```text
+Netlist + Testbench
+        ↓
+     iverilog
+        ↓
+      VCD File
+        ↓
+     GTKWave
+```
+
+The waveform is checked to confirm that the synthesized design produces the expected functionality.
+
+### Verification Flow
+
+<img width="701" alt="Synthesis verification" src="PASTE_YOUR_SECOND_IMAGE_LINK_HERE" />
+
+---
+
+# 8️⃣ Conclusion
+
+Through this experiment, I learned the basic RTL design flow using Verilog. I understood the purpose of a simulator, design, and testbench, successfully compiled and simulated a **2:1 Multiplexer** using **Icarus Verilog**, and verified the circuit's functionality using **GTKWave** and an introduction to **Yosys synthesis**. This experiment provided a strong foundation for further digital design experiments.
 
 ---
