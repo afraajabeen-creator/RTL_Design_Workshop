@@ -23,7 +23,7 @@ The objective of this experiment was to understand the fundamentals of Register 
 
 ---
 
-## Digital Design Verification
+# 1️⃣ Digital Design Verification
 
 ### Simulator
 
