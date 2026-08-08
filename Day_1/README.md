@@ -161,9 +161,6 @@ endmodule
 ---
 
 # 5️⃣ Introduction to Yosys
----
-
-# 5️⃣ Introduction to Yosys
 
 **Yosys** is an open-source tool used to synthesize Verilog RTL designs and generate a gate-level netlist.
 
