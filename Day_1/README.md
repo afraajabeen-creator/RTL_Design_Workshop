@@ -158,7 +158,6 @@ endmodule
 <img width="1920" height="1012" alt="code" src="https://github.com/user-attachments/assets/24df9d93-00c8-4e5e-8ee0-a331dfd32adf" />
 
 ---
----
 
 # 5️⃣ Introduction to Yosys
 
