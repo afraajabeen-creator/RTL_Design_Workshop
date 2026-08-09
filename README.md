@@ -28,7 +28,7 @@ RTL_Design_Workshop
 └── Day_2
     └── README.md
 
----
+```
 
 # Day 1 – RTL Design, Simulation & Synthesis
 
