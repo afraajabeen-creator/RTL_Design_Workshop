@@ -180,9 +180,7 @@ Reset ─────────► Output changes immediately
 
 Synchronous Reset
 Reset ──► Clock Edge ──► Output changes
-
-
----
+```
 
 # 4️⃣ Simulation and Synthesis
 
