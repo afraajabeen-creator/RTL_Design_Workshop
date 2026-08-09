@@ -43,8 +43,8 @@ gedit sky130_fd_sc_hd__tt_025C_1v80.lib
 This allows the available cells and their timing information to be inspected.
 
 ### 📷 SKY130 `.lib` File
+<img width="1920" height="1012" alt="VirtualBox_vsdworkshop_09_08_2026_02_10_05" src="https://github.com/user-attachments/assets/7bf75f62-4888-4244-90fb-07d948804610" />
 
-<img width="700" alt="SKY130 Liberty File" src="PASTE_IMAGE_LINK_HERE" />
 
 ---
 
@@ -87,7 +87,9 @@ This gives the synthesis tool more freedom to optimize logic across module bound
 
 ### 📷 Hierarchical / Flattened Synthesis
 
-<img width="700" alt="Synthesis Structure" src="PASTE_IMAGE_LINK_HERE" />
+<img width="1920" height="1012" alt="hier netlist" src="https://github.com/user-attachments/assets/46b3f459-8efa-4149-8ac2-36d6915c6fe4" />
+
+<img width="1920" height="1012" alt="flatten" src="https://github.com/user-attachments/assets/83b31d8b-c046-4b55-8d50-74a3b9e85dab" />
 
 ---
 
@@ -178,11 +180,7 @@ Reset ─────────► Output changes immediately
 
 Synchronous Reset
 Reset ──► Clock Edge ──► Output changes
-```
 
-### 📷 Flip-Flop Waveform
-
-<img width="700" alt="Flip-Flop Waveform" src="PASTE_IMAGE_LINK_HERE" />
 
 ---
 
@@ -212,7 +210,7 @@ gtkwave tb_dff_asyncres.vcd
 
 ### 📷 Simulation Result
 
-<img width="700" alt="Icarus Verilog Simulation" src="PASTE_IMAGE_LINK_HERE" />
+<img width="1920" height="1012" alt="asyncres waveform" src="https://github.com/user-attachments/assets/e971737d-85bb-4b78-983a-27dd0c5a2af4" />
 
 ---
 
@@ -271,13 +269,10 @@ show
 | `abc` | Performs technology mapping |
 | `show` | Displays the synthesized circuit |
 
-### 📷 Yosys Synthesis Output
-
-<img width="700" alt="Yosys Synthesis" src="PASTE_IMAGE_LINK_HERE" />
-
 ### 📷 Gate-Level Representation
 
-<img width="700" alt="Gate-Level Representation" src="PASTE_IMAGE_LINK_HERE" />
+<img width="1920" height="1012" alt="async_reset_gate png" src="https://github.com/user-attachments/assets/b6aefb1f-9c47-4dcb-8233-5bf461664823" />
+
 
 ---
 
