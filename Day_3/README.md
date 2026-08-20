@@ -58,7 +58,7 @@ The RTL description is synthesized and mapped to the appropriate logic cell avai
 
 ### Synthesized Result
 
-![AND Logic Optimization](opt_check.png)
+![AND Logic Optimization](images/opt_check.png)
 
 The synthesized representation shows the hardware implementation obtained from the RTL description.
 
@@ -72,7 +72,7 @@ During synthesis, the Boolean function is analyzed and mapped to the correspondi
 
 ### Synthesized Result
 
-![OR Logic Optimization](opt_check2.png)
+![OR Logic Optimization](images/opt_check2.png)
 
 The result demonstrates how the RTL Boolean operation is represented at the synthesized level.
 
@@ -86,7 +86,7 @@ The synthesis tool identifies the required logic function and maps it to a suita
 
 ### Synthesized Result
 
-![Three Input AND Optimization](opt_check3.png)
+![Three Input AND Optimization](images/opt_check3.png)
 
 This experiment shows how a multi-input Boolean operation is represented after synthesis.
 
@@ -108,9 +108,13 @@ The first experiment investigates a D flip-flop with a constant input.
 
 ### Synthesized Circuit
 
-![DFF Constant 1](dff_const1_diag.png)
+![DFF Constant 1](images/dff_const1_diag.png)
 
 The synthesized diagram shows the resulting sequential structure after synthesis.
+
+### Simulation Waveform
+
+![DFF Constant 1 Waveform](images/dff_const1.png)
 
 ---
 
@@ -120,11 +124,11 @@ The second experiment further examines the effect of a constant value on the D f
 
 ### Synthesized Circuit
 
-![DFF Constant 2](dff_const2_diag.png)
+![DFF Constant 2](images/dff_const2_diag.png)
 
 ### Simulation Waveform
 
-![DFF Constant 2 Waveform](dff_const2.png)
+![DFF Constant 2 Waveform](images/dff_const2.png)
 
 The waveform is used to observe the behavior of the sequential circuit with respect to the clock and output signals.
 
@@ -136,11 +140,11 @@ The third experiment continues the study of constant propagation and sequential 
 
 ### Synthesized Circuit
 
-![DFF Constant 3](dff_const3_diag.png)
+![DFF Constant 3](images/dff_const3_diag.png)
 
 ### Simulation Waveform
 
-![DFF Constant 3 Waveform](dff_const3.png)
+![DFF Constant 3 Waveform](images/dff_const3.png)
 
 The waveform helps verify that the optimized circuit continues to produce the expected behavior.
 
@@ -154,13 +158,13 @@ The counter experiment was synthesized to observe the resulting hardware structu
 
 ### Original Counter
 
-![Counter Optimization](counter_opt.png)
+![Counter Optimization](images/counter_opt.png)
 
 The synthesized representation shows the hardware generated for the counter design.
 
 ### Modified Counter
 
-![Modified Counter Optimization](counter_opt_modified.png)
+![Modified Counter Optimization](images/counter_opt_modified.png)
 
 The modified version provides a comparison of the synthesized implementation after changes were made to the design.
 
