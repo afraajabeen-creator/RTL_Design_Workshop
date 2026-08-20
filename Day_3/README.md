@@ -108,23 +108,19 @@ The first experiment investigates a D flip-flop with a constant input.
 
 ### Synthesized Circuit
 
-![DFF Constant 1](dff_const1(netlist).png)
+![DFF Constant 1](dff_const1_diag.png)
 
 The synthesized diagram shows the resulting sequential structure after synthesis.
 
-### Simulation Waveform
-
-![DFF Constant 1 Waveform](dff_const1.png)
-
-
 ---
+
 ## DFF Constant 2
 
 The second experiment further examines the effect of a constant value on the D flip-flop.
 
 ### Synthesized Circuit
 
-![DFF Constant 2](dff_const2(netlist).png)
+![DFF Constant 2](dff_const2_diag.png)
 
 ### Simulation Waveform
 
@@ -140,7 +136,7 @@ The third experiment continues the study of constant propagation and sequential 
 
 ### Synthesized Circuit
 
-![DFF Constant 3](dff_const3(netlist).png)
+![DFF Constant 3](dff_const3_diag.png)
 
 ### Simulation Waveform
 
@@ -164,7 +160,7 @@ The synthesized representation shows the hardware generated for the counter desi
 
 ### Modified Counter
 
-![Modified Counter Optimization](counter_opt(modified).png)
+![Modified Counter Optimization](counter_opt_modified.png)
 
 The modified version provides a comparison of the synthesized implementation after changes were made to the design.
 
