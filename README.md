@@ -26,22 +26,30 @@ RTL Design → Verilog Coding → RTL Simulation → Waveform Analysis → Synth
 
 ## 📂 Repository Structure
 
-RTL_Design_Workshop/
+```text
+RTL_Design_Workshop
+│
 ├── README.md
-├── Day_1/
+│
+├── Day_1
 │   └── README.md
-├── Day_2/
+│
+├── Day_2
 │   └── README.md
-├── Day_3/
-│   ├── images/
+│
+├── Day_3
+│   ├── images
 │   └── README.md
-├── Day_4/
-│   ├── images/
+│
+├── Day_4
+│   ├── images
 │   └── README.md
-└── Day_5/
-    ├── images/
+│
+└── Day_5
+    ├── images
     └── README.md
 
+```
 ---
 
 # 🟢 Day 1 – RTL Design, Simulation & Synthesis
