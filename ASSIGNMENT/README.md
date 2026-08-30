@@ -493,12 +493,6 @@ The RTL was loaded with:
 read_verilog sequence_detector.v
 ```
 
-The top-level module was selected using:
-
-```tcl
-hierarchy -top sequence_detector
-```
-
 Synthesis was performed using:
 
 ```tcl
@@ -514,7 +508,7 @@ stat
 The synthesized design was then written to a Verilog netlist:
 
 ```tcl
-write_verilog sequence_detector_netlist.v
+write_verilog sequence_detector_netlist1.v
 ```
 
 ---
