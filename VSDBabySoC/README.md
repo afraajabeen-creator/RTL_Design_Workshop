@@ -2,19 +2,17 @@
 
 ## Overview
 
-This repository documents my understanding of the complete RTL-to-Gate-Level design flow using the VSDBabySoC design.
+This repository documents my understanding of the RTL-to-Gate-Level flow using VSDBabySoC.
 
-The work begins with RTL simulation and functional verification, followed by synthesis, logic optimization, technology mapping, gate-level netlist generation and Gate-Level Simulation (GLS).
+The work covers RTL simulation, functional verification, Yosys synthesis, logic optimization, technology mapping, gate-level netlist generation and Gate-Level Simulation (GLS).
 
-As a supporting study of RTL coding styles and their effect on synthesized hardware, I have also included experiment on `good_mux` . These experiments cover RTL functional simulation and Gate-Level Simulation.
+A small Good MUX study is also included to understand how RTL coding style can affect synthesis and inferred hardware.
 
-The objective of this work is not only to obtain a working netlist, but to understand what happens to the RTL description at every stage of the design flow.
+The objective is to understand what happens to an RTL design at each stage rather than simply generating a final netlist.
 
 ---
 
-# 1. Repository Structure
-
-The repository is organized to keep the RTL source files, testbenches, synthesized netlist and supporting screenshots separate.
+## 1. Repository Structure
 
 ```text
 VSDBabySoC/
@@ -25,283 +23,139 @@ VSDBabySoC/
 │   ├── module/
 │   │   ├── vsdbabysoc.v
 │   │   ├── rvmyth.v
-│   │   ├── clk_gate.v
+│   │   └── clk_gate.v
 │   │
-│   ├── testbench/
+│   └── testbench/
 │       └── testbench.v
 │
-│
-│── lib/
+├── lib/
 │   ├── avsdpll.lib
 │   ├── avsddac.lib
 │   └── sky130_fd_sc_hd__tt_025C_1v80.lib
 │
 ├── netlist/
-│   └── baby_soc_netlist_new.v
+│   └── babysoc_netlist.v
 │
-├── mux/
-│   ├── good_mux_rtl_simulation
-│   ├── good_mux_graphical_rep
-│   ├── good_mux_netlist.v
-│   └── comparision of funcional simulation of goodmux vs gate level simulation
+├── images/
+│   ├── babysoc_rtl.png
+│   ├── rvmyth_hierarchy.png
+│   ├── synthesis_statistics.png
+│   ├── abc_technology_mapping.png
+│   ├── post_optimization_statistics.png
+│   ├── pre_synth_gls.png
+│   └── post_synth_gls.png
 │
-└── images/
-    ├── pre_synth_gls
-    ├── vsdbabysoc_rtl
-    ├── rvmyth_hierarchy
-    ├── synthesis_statistics
-    ├── abc_technology_mapping
-    ├── post_optimization_statistics
-    ├── post_synth_gls
-   
+└── mux/
+    ├── good_mux.v
+    ├── bad_mux.v
+    ├── good_mux_rtl_simulation.png
+    ├── good_mux_graphical_rep.png
+    ├── good_mux_netlist.png
+    └── good_mux_rtl_vs_gls.png
 ```
 
 ---
 
-# 2. Tools Used
+## 2. Tools Used
 
-| Tool | Purpose |
-|------|---------|
-| Icarus Verilog | RTL and Gate-Level Simulation |
-| GTKWave | Waveform visualization and analysis |
-| Yosys | RTL synthesis and netlist generation |
-| ABC | Logic optimization and technology mapping |
-| SKY130 Libraries | Standard-cell technology mapping |
-| Git | Version control |
-| GitHub | Repository management and documentation |
+| Tool             | Purpose                                   |
+| ---------------- | ----------------------------------------- |
+| Icarus Verilog   | RTL and Gate-Level Simulation             |
+| GTKWave          | Waveform visualization                    |
+| Yosys            | RTL synthesis and netlist generation      |
+| ABC              | Logic optimization and technology mapping |
+| SKY130 Libraries | Technology-specific cell mapping          |
+| Git              | Version control                           |
+| GitHub           | Repository management and documentation   |
 
 ---
 
-# 3. Overall RTL-to-Gate-Level Flow
+## 3. RTL-to-Gate-Level Flow
 
 The complete flow followed in this work is:
 
 ```text
-                 RTL Design
-                     │
-                     ▼
-              RTL Simulation
-                     │
-                     ▼
-          RTL Functional Testing
-                     │
-                     ▼
-                 Synthesis
-                     │
-                     ▼
-            Logic Optimization
-                     │
-                     ▼
-           Technology Mapping
-                     │
-                     ▼
-            Gate-Level Netlist
-                     │
-                     ▼
-          Gate-Level Simulation
-                     │
-                     ▼
-       Pre-Synthesis vs Post-Synthesis
-                Comparison
+RTL Design
+    ↓
+RTL Simulation
+    ↓
+Functional Verification
+    ↓
+Synthesis
+    ↓
+Logic Optimization
+    ↓
+Technology Mapping
+    ↓
+Gate-Level Netlist
+    ↓
+Gate-Level Simulation
+    ↓
+Pre-Synthesis vs Post-Synthesis Comparison
 ```
 
 The purpose of this flow is to verify that the intended functionality described at RTL is preserved after synthesis and technology mapping.
 
 ---
 
-# 4. RTL Simulation
+## 4. Good MUX 
 
-RTL simulation is the first verification stage.
+Before working with VSDBabySoC, I studied MUX implementations to understand the relationship between RTL coding style and synthesized hardware.
 
-At this stage, the design is simulated using the original RTL description before it is converted into gates.
-
-The main purpose is to verify the functional behaviour of the design and establish a reference waveform.
-
-```text
-RTL Design
-    │
-    ▼
-RTL Simulation
-    │
-    ▼
-Reference Behaviour
-```
-
-The RTL simulation therefore becomes the baseline against which the synthesized gate-level implementation can later be compared.
-
----
-
-# 5. Good MUX Experiment
-
-Before working with the complete VSDBabySoC flow, I studied the RTL implementations of a multiplexer.
-
-This experiment was used to understand:
-
-- RTL coding style
-- Combinational logic
-- Complete assignments
-- RTL simulation
-- Synthesis interpretation
-- Gate-Level Simulation
-
-The experiments help demonstrate that the way RTL is written can influence the hardware inferred during synthesis.
-
----
-
-# 5.1 Good MUX
-
-A 2:1 multiplexer contains two data inputs, one select input and one output.
+A 2:1 MUX has two data inputs, one select signal and one output.
 
 ```text
                  ┌─────────────┐
         A ──────►│             │
-                 │    2:1 MUX  ├────► Y
-        B ──────►│             │
-                 │             │
+        B ──────►│    2:1 MUX  ├────► Y
       SEL ──────►│             │
                  └─────────────┘
 ```
 
-Its functional behaviour is:
+Its expected behaviour is:
 
 ```text
 SEL = 0  →  Y = A
 SEL = 1  →  Y = B
 ```
 
-A properly specified combinational MUX should define its output for every possible input and select condition.
+The experiment demonstrates that combinational RTL should completely specify the required output behaviour.
 
----
-
-## 5.1.1 Good MUX RTL Simulation
-
-The RTL simulation was performed using Icarus Verilog.
-
-Example command:
-
-```bash
-iverilog good_mux.v tb_good_mux.v
-gtkwave tb_good_mux.vcd
-```
-
-### Good MUX RTL Waveform & graphical representation
+### Good MUX RTL Simulation
 
 ![Good MUX RTL Simulation](mux/good_mux_rtl_simulation.png)
-![Graphical Representation](mux/good_mux_graphical_rep.png)
 
-The waveform is used to verify that the output follows the selected input.
+### Good MUX Graphical Representation
 
----
+![Good MUX Graphical Representation](mux/good_mux_graphical_rep.png)
 
-## 5.1.2 Good MUX RTL Simulation vs Gate-Level Simulation 
+### Good MUX Synthesized Netlist
 
-After synthesis, the generated gate-level implementation was simulated and compared to the RTL simulation
+![Good MUX Netlist](mux/good_mux_netlist.v.png)
 
-![Good MUX RTL vs Gate-Level Simulation](mux/comparision_rtlsimulation_gate_level_simulation.png)
+### Good MUX RTL vs Gate-Level Simulation
 
-The GLS waveform verifies that the synthesized implementation maintains the intended MUX functionality.
+![Good MUX RTL vs Gate-Level Simulation](mux/good_mux_rtl_vs_gls.png)
 
----
+The GLS waveform confirms that the synthesized implementation maintains the intended MUX functionality.
 
-# 5.2 Bad MUX
-
-The bad MUX experiment was performed to understand the consequences of incomplete combinational assignments.
-
-In combinational logic, the output should be assigned for every possible condition.
-
-If an output is not assigned under some condition, the synthesis tool may infer storage behaviour such as a latch.
-
-This experiment demonstrates why RTL coding style matters during synthesis.
-
----
-
-## 5.2.1 Bad MUX RTL
-
-Add the actual RTL source file:
-
-```text
-mux/bad_mux.v
-```
-
----
-
-## 5.2.2 Bad MUX Testbench
-
-Add the testbench used for the experiment:
-
-```text
-mux/bad_mux_tb.v
-```
-
----
-
-## 5.2.3 Bad MUX RTL Simulation
-
-Example command:
-
-```bash
-iverilog -o bad_mux_sim mux/bad_mux.v mux/bad_mux_tb.v
-./bad_mux_sim
-gtkwave bad_mux.vcd
-```
-
-### Bad MUX RTL Waveform
-
-![Bad MUX RTL Simulation](images/badmux_rtl_simulation.png)
-
-The waveform demonstrates the behaviour of the incompletely specified combinational circuit.
-
----
-
-## 5.2.4 Bad MUX Functional Testing
-
-Different combinations of inputs and control signals were applied during functional testing.
-
-### Bad MUX Functional Testing
-
-![Bad MUX Functional Testing](images/badmux_rtl_functional.png)
-
-The observed behaviour demonstrates the importance of complete combinational assignments.
-
----
-
-## 5.2.5 Bad MUX Gate-Level Simulation
-
-The synthesized gate-level implementation was also simulated.
-
-### Bad MUX GLS
-
-![Bad MUX Gate-Level Simulation](images/badmux_gls.png)
-
-The gate-level result helps demonstrate how synthesis interprets the RTL description.
-
----
-
-# 5.3 Learning from the MUX Experiments
-
-The good_mux and bad_mux experiments demonstrate an important RTL design principle:
+The main learning from the MUX experiment is:
 
 ```text
 RTL Coding Style
-       │
-       ▼
+       ↓
 Synthesis Interpretation
-       │
-       ▼
+       ↓
 Inferred Hardware
 ```
 
-Therefore, RTL design is not only about obtaining the expected simulation output.
-
-The designer must also understand how synthesis interprets the RTL and what hardware structure can be inferred from it.
-
 ---
 
-# 6. VSDBabySoC
+## 5. VSDBabySoC
 
-VSDBabySoC is used as the main design for studying the complete RTL-to-gate-level flow.
+VSDBabySoC is the main design used for studying the complete RTL-to-gate-level flow.
 
-The design integrates major functional blocks including:
+The design integrates major blocks including the PLL, RISC-V based processor core and DAC.
 
 ```text
              ┌──────────────┐
@@ -329,125 +183,116 @@ The design integrates major functional blocks including:
                    OUT
 ```
 
-The PLL provides the clocking function.
-
-The RISC-V based core performs the digital processing.
-
-The DAC provides the digital-to-analog interface represented in the VSDBabySoC design.
+The PLL provides the clocking function, the rvmyth block performs the digital processing, and the DAC provides the output interface.
 
 ---
 
-# 7. VSDBabySoC Source Files
+## 6. Design Under Test
 
-The RTL source files used for the VSDBabySoC experiment should be added to the repository.
-
-Example:
+The main Design Under Test is:
 
 ```text
-src/
-├── module/
-│   ├── vsdbabysoc.v
-│   ├── rvmyth.v
-│   ├── clk_gate.v
-│   └── [other required RTL modules]
-│
-├── include/
-│   └── [required include files]
-│
-└── lib/
-    ├── avsdpll.lib
-    ├── avsddac.lib
-    └── sky130_fd_sc_hd__tt_025C_1v80.lib
+vsdbabysoc
 ```
 
-Only files actually required by the design should be included.
+The main RTL file is:
+
+```text
+src/module/vsdbabysoc.v
+```
+
+Supporting RTL modules are:
+
+```text
+src/module/rvmyth.v
+src/module/clk_gate.v
+```
+
+The testbench is:
+
+```text
+src/testbench/testbench.v
+```
+
+The testbench provides the required stimulus to the VSDBabySoC and observes its output behaviour.
 
 ---
 
-# 8. VSDBabySoC Testbench
+## 7. VSDBabySoC RTL Simulation
 
-The testbench applies the required inputs to VSDBabySoC and observes the output signals.
+RTL simulation verifies the original RTL implementation before synthesis.
 
-Add the actual testbench file here:
-
-```text
-testbench/testbench.v
-```
-
-The important signals observed during simulation include signals such as:
+The basic idea is:
 
 ```text
-reset
-VCO_IN
-ENb_CP
-ENb_VCO
-REF
-VREFL
-VREFH
-OUT
+RTL
+ ↓
+Simulation
+ ↓
+Reference Behaviour
 ```
 
-> Update this list to match the exact signals present in my final testbench.
+Icarus Verilog is used for simulation and GTKWave is used to inspect the generated waveform.
 
----
-
-# 9. VSDBabySoC RTL Simulation
-
-The first stage of the VSDBabySoC experiment is simulation of the original RTL design.
-
-The purpose is to establish a functional reference before synthesis.
-
-Example compilation flow:
+Example flow:
 
 ```bash
 iverilog -DPRE_SYNTH_SIM \
 -I src/include/ \
--I [VERILOG_MODEL_PATH] \
+-I <VERILOG_MODEL_PATH> \
 -I src/module/ \
-src/module/testbench.v
+src/testbench/testbench.v
 
 ./a.out
+
+gtkwave <PRE_SYNTH_VCD_FILE>
 ```
 
-The generated waveform can then be opened using:
+The exact paths depend on the environment used for the simulation.
 
-```bash
-gtkwave [PRE_SYNTH_VCD_FILE]
-```
-
-> Replace the placeholders with the actual paths and filenames used in my experiment.
-
-### VSDBabySoC RTL Simulation
+### VSDBabySoC RTL Waveform
 
 ![VSDBabySoC RTL Simulation](images/babysoc_rtl.png)
 
-The RTL waveform provides the reference behaviour for later gate-level verification.
+This waveform acts as the functional reference for later GLS comparison.
 
 ---
 
-# 10. Understanding Synthesis
+## 8. VSDBabySoC Hierarchy
 
-Synthesis converts an RTL description into a structural representation consisting of logic elements.
+The VSDBabySoC design contains multiple interconnected modules.
 
-Conceptually:
+Understanding the hierarchy is important because the synthesis tool must have access to all modules required to elaborate the top-level design.
+
+![VSDBabySoC Hierarchy](images/rvmyth_hierarchy.png)
+
+The hierarchy provides a structural view of how the processor core and other design blocks are integrated into the SoC.
+
+---
+
+## 9. Understanding Synthesis
+
+Synthesis converts the RTL description into a structural hardware representation.
+
+The general process is:
 
 ```text
 RTL
- │
- ▼
+ ↓
 Elaboration
- │
- ▼
-Logic Optimization
- │
- ▼
+ ↓
+Generic Logic
+ ↓
+Optimization
+ ↓
 Technology Mapping
- │
- ▼
+ ↓
 Gate-Level Netlist
 ```
 
-The RTL describes the intended behaviour, while the synthesized netlist describes how that behaviour is implemented using available hardware cells.
+RTL primarily describes the intended behaviour and register-transfer operations.
+
+A netlist describes the hardware structure in terms of cells and their interconnections.
 
 Therefore:
 
@@ -455,11 +300,7 @@ Therefore:
 RTL
 =
 Behavioural / Register-Transfer Description
-```
 
-while:
-
-```text
 Netlist
 =
 Structural Hardware Description
@@ -467,11 +308,9 @@ Structural Hardware Description
 
 ---
 
-# 11. Reading RTL into Yosys
+## 10. Reading RTL into Yosys
 
-The synthesis process begins by loading the required Verilog source files into Yosys.
-
-Example:
+The synthesis process begins by loading the required Verilog modules into Yosys.
 
 ```bash
 yosys
@@ -481,111 +320,81 @@ read_verilog -I src/include src/module/rvmyth.v
 read_verilog -I src/include src/module/clk_gate.v
 ```
 
-Additional RTL files required by the design hierarchy should also be loaded.
-
-The important requirement is that Yosys must have access to all modules required to elaborate the top-level design.
-
-### RTL Loaded into Yosys
-
-![RTL Loaded into Yosys](images/yosys_read_rtl.png)
+All modules required by the VSDBabySoC hierarchy must be available so that Yosys can correctly elaborate the top-level design.
 
 ---
 
-# 12. Loading the Technology Libraries
+## 11. Loading Technology Libraries
 
-Synthesis requires information about the cells available in the target technology.
+Synthesis requires information about the hardware cells available in the target technology.
 
-Liberty files contain information such as:
+The Liberty files contain information about the available cells and their characteristics.
 
-- Cell functionality
-- Input and output pins
-- Timing characteristics
-- Drive information
-- Sequential-cell behaviour
-- Other characteristics required during synthesis and mapping
+The libraries used are:
 
-The relevant libraries used in this flow include the PLL, DAC and SKY130 standard-cell libraries.
-
-Example:
-
-```bash
-read_liberty -lib src/lib/avsdpll.lib
-read_liberty -lib src/lib/avsddac.lib
-read_liberty -lib src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+```text
+lib/avsdpll.lib
+lib/avsddac.lib
+lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
-The standard-cell library can be thought of as the set of hardware building blocks available to the synthesis tool.
+They are loaded using:
+
+```bash
+read_liberty -lib lib/avsdpll.lib
+read_liberty -lib lib/avsddac.lib
+read_liberty -lib lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+```
+
+The SKY130 standard-cell library provides the cells that can be used during technology mapping.
 
 ---
 
-# 13. RTL Synthesis
+## 12. RTL Synthesis
 
-The top-level module is specified during synthesis.
+The top-level module is specified using:
 
 ```bash
 synth -top vsdbabysoc
 ```
 
-The synthesis process transforms the RTL description into a structural representation.
+Yosys processes the RTL and converts it into a synthesized representation.
 
-The top-level module tells Yosys which module represents the complete design to be synthesized.
+The top-level module identifies the complete design that must be synthesized.
 
 ---
 
-# 14. Synthesis Statistics
+## 13. Synthesis Statistics
 
-After synthesis, Yosys reports statistics about the resulting design.
+After synthesis, Yosys reports statistics describing the resulting design.
 
-The statistics can include:
+These can include:
 
-- Number of wires
-- Number of wire bits
-- Number of cells
-- Number of modules
-- Number of sequential elements
-- Number of combinational elements
+* Number of wires
+* Number of wire bits
+* Number of cells
+* Sequential elements
+* Combinational elements
 
-### Synthesis Statistics
-
-![Synthesis Statistics](images/synthesis_stats.png)
+![Synthesis Statistics](images/synthesis_statistics.png)
 
 These statistics provide a quantitative view of the hardware inferred from the RTL.
 
 ---
 
-# 15. Structural Verification
+## 14. Sequential Cell Mapping
 
-After synthesis, the design can be checked for structural issues using:
+Sequential elements such as flip-flops must be mapped to cells available in the target technology.
 
 ```bash
-check
+dfflibmap -liberty lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
-The `check` command is useful for identifying structural problems in the synthesized design.
-
-### Yosys Structural Check
-
-![Yosys Check](images/yosys_check.png)
+This maps generic sequential elements to technology-specific sequential cells.
 
 ---
 
-# 16. Sequential Cell Mapping
-
-Sequential elements such as flip-flops need to be mapped to cells available in the target technology library.
-
-For the SKY130 standard-cell library:
-
-```bash
-dfflibmap -liberty src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
-```
-
-This stage replaces generic sequential representations with technology-specific sequential cells.
-
-This is an important step in moving from technology-independent synthesis to technology-aware implementation.
-
----
-
-# 17. Logic Optimization
+## 15. Logic Optimization
 
 The synthesized design can be optimized using:
 
@@ -593,48 +402,55 @@ The synthesized design can be optimized using:
 opt
 ```
 
-Optimization attempts to simplify the circuit while preserving its intended functionality.
+Optimization attempts to simplify the circuit without changing its intended functionality.
 
-Possible transformations include:
+Typical transformations include:
 
-- Removing redundant logic
-- Simplifying Boolean expressions
-- Propagating constants
-- Removing unused portions of the design
-- Simplifying connections
+* Constant propagation
+* Removal of redundant logic
+* Boolean simplification
+* Removal of unused logic
+* Simplification of connections
+
+![Post Optimization Statistics](images/post_optimization_statistics.png)
 
 ---
 
-# 18. Combinational Technology Mapping
+## 16. Technology Mapping with ABC
 
-ABC is used for combinational optimization and technology mapping.
+ABC performs combinational logic optimization and technology mapping.
 
 ```bash
-abc -liberty src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
-The combinational logic is optimized and mapped to cells available in the selected technology library.
-
-Examples of standard-cell types include:
+The generic combinational logic is mapped to cells available in the SKY130 library.
 
 ```text
-AND
-OR
-NAND
-NOR
-XOR
-XNOR
-INV
-MUX
+Generic Logic
+      ↓
+     ABC
+      ↓
+SKY130 Standard Cells
 ```
 
-### Technology Mapping
-
-![Technology Mapping](images/technology_mapping.png)
+![ABC Technology Mapping](images/abc_technology_mapping.png)
 
 ---
 
-# 19. Visualizing the Synthesized Design
+## 17. Structural Check
+
+After synthesis and mapping, the design can be checked for structural issues using:
+
+```bash
+check
+```
+
+This helps identify structural problems before generating the final netlist.
+
+---
+
+## 18. Synthesized Design Visualization
 
 The synthesized design can be visualized using:
 
@@ -642,19 +458,15 @@ The synthesized design can be visualized using:
 show vsdbabysoc
 ```
 
-### Synthesized Design
+The generated representation provides a structural view of the synthesized hardware.
 
-![Synthesized Design](images/synthesized_design.png)
-
-The graph provides a structural view of the synthesized circuit.
-
-At this stage, the design is no longer represented only as behavioural RTL. It has been transformed into interconnected hardware elements.
+It helps demonstrate the transformation from RTL-level logic into interconnected hardware cells.
 
 ---
 
-# 20. Preparing the Final Netlist
+## 19. Preparing the Final Netlist
 
-Before generating the final gate-level Verilog netlist, the design can be flattened and cleaned.
+Before writing the final gate-level netlist, the design is flattened and cleaned.
 
 ```bash
 flatten
@@ -663,72 +475,47 @@ clean -purge
 rename -enumerate
 ```
 
-## Flatten
+The purpose of these commands is:
 
-```bash
+```text
 flatten
-```
+→ Removes hierarchical boundaries
 
-The `flatten` command removes hierarchical boundaries and produces a flattened representation of the design.
-
-## Set Undefined Values
-
-```bash
 setundef -zero
-```
+→ Converts undefined values to zero
 
-This converts undefined values into zero for the purpose of preparing the final representation.
-
-## Clean
-
-```bash
 clean -purge
-```
+→ Removes unnecessary design objects
 
-This removes unnecessary objects from the design.
-
-## Rename
-
-```bash
 rename -enumerate
+→ Systematically renames internal objects
 ```
-
-This provides systematic names to internal objects.
 
 ---
 
-# 21. Gate-Level Netlist Generation
+## 20. Gate-Level Netlist Generation
 
 The final synthesized representation is written as a Verilog netlist.
 
-Example:
-
 ```bash
-write_verilog -noattr [FINAL_NETLIST_NAME].v
+write_verilog -noattr netlist/babysoc_netlist.v
 ```
 
-Replace `[FINAL_NETLIST_NAME]` with the exact filename generated during my VSDBabySoC synthesis.
-
-For example:
+The generated file is stored at:
 
 ```text
-netlist/
-└── [FINAL_NETLIST_NAME].v
+netlist/babysoc_netlist.v
 ```
 
-### Generated Gate-Level Netlist
-
-![Gate-Level Netlist](images/netlist.png)
-
-The generated file represents the synthesized gate-level implementation rather than the original RTL.
+The netlist represents the synthesized implementation rather than the original RTL description.
 
 ---
 
-# 22. What Changes After Synthesis?
+## 21. RTL vs Gate-Level Representation
 
-The RTL and gate-level descriptions may look very different even though they implement the same intended functionality.
+The gate-level implementation may look very different from the RTL even though the intended functionality is the same.
 
-For example, RTL such as:
+For example:
 
 ```verilog
 if (sel)
@@ -737,279 +524,197 @@ else
     y = a;
 ```
 
-may be represented after synthesis using a MUX cell or a combination of standard cells.
-
-Conceptually:
-
-```text
-        ┌───────────┐
-A ─────►│           │
-B ─────►│   MUX /   ├────► Y
-SEL ───►│   Logic   │
-        └───────────┘
-```
-
-The synthesized implementation may also use an equivalent combination of simpler standard cells.
+may be implemented using a MUX cell or an equivalent combination of standard cells.
 
 Therefore:
 
 ```text
-RTL internal structure
-        ≠
-Gate-Level internal structure
+RTL Structure
+     ≠
+Gate-Level Structure
 ```
 
-The important requirement is that the intended functionality remains correct.
+while the desired relationship is:
+
+```text
+RTL Functionality
+     =
+Gate-Level Functionality
+```
+
+Synthesis can optimize, merge, remove, rename and restructure internal logic.
 
 ---
 
-# 23. Gate-Level Simulation
+## 22. Gate-Level Simulation
 
-Gate-Level Simulation simulates the synthesized netlist instead of the original RTL.
+Gate-Level Simulation uses the synthesized netlist instead of the original RTL.
 
-The verification concept is:
+The verification flow is:
 
 ```text
-                 RTL
-                  │
-                  ▼
-          RTL Simulation
-                  │
-                  ▼
-          Reference Behaviour
-                  │
-                  │
-              Synthesis
-                  │
-                  ▼
-          Gate-Level Netlist
-                  │
-                  ▼
-            GLS Simulation
-                  │
-                  ▼
-          Functional Comparison
+             RTL
+              ↓
+       RTL Simulation
+              ↓
+      Reference Behaviour
+              ↓
+          Synthesis
+              ↓
+       Gate-Level Netlist
+              ↓
+        GLS Simulation
+              ↓
+      Functional Comparison
 ```
 
 GLS provides an additional verification stage after synthesis.
 
 ---
 
-# 24. Pre-Synthesis Simulation
+## 23. Pre-Synthesis GLS Reference
 
-The pre-synthesis simulation uses the original RTL implementation.
+The pre-synthesis simulation represents the original RTL implementation and provides the reference waveform.
 
-The testbench is compiled with the RTL design.
+![Pre-Synthesis Waveform](images/pre_synth_gls.png)
 
-Example:
-
-```bash
-iverilog -DPRE_SYNTH_SIM \
--I src/include/ \
--I [VERILOG_MODEL_PATH] \
--I src/module/ \
-src/module/testbench.v
-
-./a.out
-```
-
-The generated waveform can be opened using:
-
-```bash
-gtkwave [PRE_SYNTH_VCD_FILE]
-```
-
-### Pre-Synthesis Waveform
-
-![Pre-Synthesis Simulation](images/pre_synth_gls.png)
-
-This waveform represents the expected functional behaviour before synthesis.
+The important input and output signals are observed to establish the expected functional behaviour.
 
 ---
 
-# 25. Post-Synthesis Gate-Level Simulation
+## 24. Post-Synthesis GLS
 
-For post-synthesis simulation, the generated gate-level netlist and the required technology Verilog models are used.
-
-Example:
-
-```bash
-iverilog -DPOST_SYNTH_SIM \
--I src/include/ \
--I [VERILOG_MODEL_PATH] \
--I src/module/ \
-src/module/testbench.v
-
-./a.out
-```
-
-The resulting waveform can be opened using:
-
-```bash
-gtkwave [POST_SYNTH_VCD_FILE]
-```
-
-### Post-Synthesis GLS
-
-![Post-Synthesis Gate-Level Simulation](images/post_synth_gls.png)
-
-This simulation operates on the synthesized gate-level representation.
-
----
-
-# 26. Pre-Synthesis vs Post-Synthesis Comparison
-
-The most important verification step is comparison of the pre-synthesis and post-synthesis waveforms.
-
-### Waveform Comparison
-
-![Pre-Synthesis vs Post-Synthesis Comparison](images/pre_post_comparison.png)
-
-The comparison should focus on important observable signals and outputs.
-
-Internal signal names and structures may change after synthesis.
-
-Therefore, the goal is not necessarily:
+The post-synthesis simulation uses:
 
 ```text
-Every internal waveform is identical
+Testbench
+     +
+Gate-Level Netlist
+     +
+Required Technology Verilog Models
 ```
 
-Instead, the goal is:
+The resulting waveform represents the behaviour of the synthesized gate-level implementation.
+
+![Post-Synthesis GLS](images/post_synth_gls.png)
+
+---
+
+## 25. Pre-Synthesis vs Post-Synthesis Comparison
+
+The pre-synthesis and post-synthesis waveforms are compared to verify that synthesis has preserved the intended functionality.
+
+The comparison focuses on meaningful observable signals such as inputs, reset, clock-related behaviour and outputs.
+
+The goal is:
 
 ```text
-Expected RTL Functionality
-            ≈
-Observed Gate-Level Functionality
+Expected RTL Behaviour
+        ↓
+Synthesized Implementation
+        ↓
+Observed GLS Behaviour
 ```
 
----
-
-# 27. Why Internal Waveforms Can Differ
-
-Synthesis can perform several transformations, including:
-
-- Logic optimization
-- Removal of redundant logic
-- Constant propagation
-- Logic merging
-- Boolean simplification
-- Technology mapping
-- Changing internal signal names
-- Flattening hierarchy
-- Replacing RTL constructs with standard cells
-
-As a result, the internal structure of the gate-level design can differ significantly from the RTL.
-
-Therefore, internal signals should not automatically be expected to have the same names or shapes.
-
-The comparison should focus on meaningful observable signals and outputs.
+Internal signals may differ because synthesis can change the internal implementation.
 
 ---
 
-# 28. RTL vs Gate-Level Design
+## 26. Why Internal Waveforms Can Differ
 
-| RTL | Gate-Level |
-|-----|------------|
-| Behaviour-oriented | Structure-oriented |
-| Higher abstraction | Lower abstraction |
-| Describes intended hardware behaviour | Describes synthesized cell connectivity |
-| Technology independent | Technology mapped |
-| Easier to read and modify | More detailed and complex |
+Synthesis may perform:
+
+* Logic optimization
+* Constant propagation
+* Logic merging
+* Redundant logic removal
+* Technology mapping
+* Hierarchy flattening
+* Internal signal renaming
+
+Therefore, the internal gate-level structure does not have to be identical to the RTL structure.
+
+A different internal waveform does not automatically indicate a functional error.
+
+The important comparison is the behaviour of the relevant observable signals and outputs.
+
+---
+
+## 27. RTL vs Gate-Level
+
+| RTL                              | Gate-Level                           |
+| -------------------------------- | ------------------------------------ |
+| Higher abstraction               | Lower abstraction                    |
+| Behaviour-oriented               | Structure-oriented                   |
+| Easier to read                   | More detailed                        |
+| Technology independent           | Technology mapped                    |
+| Describes intended functionality | Describes cell connectivity          |
 | Used for functional verification | Used for post-synthesis verification |
 
-The transition from RTL to gate-level representation is one of the main concepts demonstrated in this work.
-
 ---
 
-# 29. Role of the Standard-Cell Library
+## 28. Role of the SKY130 Standard-Cell Library
 
-The standard-cell library determines the set of cells available to implement the synthesized circuit.
+The standard-cell library determines which technology-specific cells can be used during mapping.
 
-The process can be represented as:
+The relationship is:
 
 ```text
-RTL Logic
-    │
-    ▼
+RTL
+ ↓
 Generic Logic
-    │
-    ▼
+ ↓
 Technology Mapping
-    │
-    ▼
+ ↓
 SKY130 Standard Cells
 ```
 
-Instead of representing logic using arbitrary ideal gates, the synthesis tool maps the design to actual cells available in the selected technology.
+Examples of standard-cell types include:
 
-Therefore, the same RTL can potentially produce different gate-level implementations when synthesized using different technology libraries.
+```text
+INV
+NAND
+NOR
+AND
+OR
+XOR
+MUX
+D Flip-Flop
+```
 
----
-
-# 30. Important Concepts Learned
-
-## RTL
-
-Register Transfer Level is an abstraction used to describe data transfers between registers and the combinational logic operating on that data.
-
-## Synthesis
-
-Synthesis converts RTL into a structural hardware representation.
-
-## Logic Optimization
-
-Logic optimization simplifies the design while attempting to preserve its functionality.
-
-## Technology Mapping
-
-Technology mapping converts generic logic into cells available in the selected semiconductor technology.
-
-## Standard Cell
-
-A standard cell is a pre-designed digital building block such as an inverter, NAND gate, NOR gate or flip-flop.
-
-## Netlist
-
-A netlist describes the cells in the design and the connections between those cells.
-
-## Gate-Level Simulation
-
-Gate-Level Simulation verifies the behaviour of the synthesized hardware representation.
+Therefore, the selected technology library influences the structure of the final gate-level netlist.
 
 ---
 
-# 31. Key Observations
+## 29. Important Observations
 
-### Observation 1 – RTL Coding Matters
+### RTL Coding Matters
 
-The good_mux and bad_mux experiments demonstrated that different RTL coding styles can lead to different hardware interpretations.
+The MUX experiments demonstrated that RTL coding style influences how synthesis interprets the design.
 
-### Observation 2 – Synthesis Changes Structure
+### Synthesis Changes Structure
 
-The synthesized netlist can look very different from the original RTL.
+The gate-level netlist can be structurally very different from the RTL.
 
-### Observation 3 – Technology Libraries Matter
+### Optimization Changes the Implementation
 
-The available standard-cell library determines the cells used during technology mapping.
+Redundant or unnecessary logic may be simplified or removed while preserving functionality.
 
-### Observation 4 – RTL Simulation and GLS Serve Different Purposes
+### Technology Libraries Matter
 
-RTL simulation verifies the intended behaviour of the design.
+The available technology library determines the cells used during technology mapping.
 
-GLS verifies that the synthesized gate-level implementation maintains the expected behaviour.
+### GLS Is Important
 
-### Observation 5 – Internal Signals Can Change
+RTL simulation verifies the original RTL, while GLS verifies the synthesized gate-level implementation.
 
-Synthesis can rename, optimize or remove internal signals.
+### Internal Signals Can Change
 
-Therefore, pre-synthesis and post-synthesis waveforms should be compared using meaningful observable signals.
+Synthesis may rename, optimize or remove internal signals, so functional comparison should focus on meaningful signals and outputs.
 
 ---
 
-# 32. Complete Synthesis Command Flow
-
-The main synthesis flow can be summarized as:
+## 30. Complete Synthesis Command Flow
 
 ```bash
 yosys
@@ -1018,17 +723,17 @@ read_verilog src/module/vsdbabysoc.v
 read_verilog -I src/include src/module/rvmyth.v
 read_verilog -I src/include src/module/clk_gate.v
 
-read_liberty -lib src/lib/avsdpll.lib
-read_liberty -lib src/lib/avsddac.lib
-read_liberty -lib src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_liberty -lib lib/avsdpll.lib
+read_liberty -lib lib/avsddac.lib
+read_liberty -lib lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 
 synth -top vsdbabysoc
 
-dfflibmap -liberty src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+dfflibmap -liberty lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 
 opt
 
-abc -liberty src/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 
 check
 
@@ -1039,253 +744,124 @@ setundef -zero
 clean -purge
 rename -enumerate
 
-write_verilog -noattr [FINAL_NETLIST_NAME].v
-```
-
-> Replace `[FINAL_NETLIST_NAME]` with the actual VSDBabySoC netlist filename generated during my experiment.
-
----
-
-# 33. Complete Verification Flow
-
-```text
-                 ┌─────────────────┐
-                 │    RTL Design   │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │ RTL Simulation  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │ Functional Test│
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │    Synthesis    │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │  Optimization   │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │ Technology Map  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │ Gate-Level      │
-                 │ Netlist         │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │      GLS        │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │ Pre/Post Compare│
-                 └─────────────────┘
+write_verilog -noattr netlist/babysoc_netlist.v
 ```
 
 ---
 
-# 34. Files to Add
+## 31. Files Included in the Repository
 
-The repository should contain the actual files used during the experiments.
-
-## RTL Files
+### RTL Source
 
 ```text
-[ ] vsdbabysoc.v
-[ ] rvmyth.v
-[ ] clk_gate.v
-[ ] Other required RTL modules
+src/module/vsdbabysoc.v
+src/module/rvmyth.v
+src/module/clk_gate.v
 ```
 
-## Testbench Files
+### Testbench
 
 ```text
-[ ] VSDBabySoC testbench
-[ ] good_mux_tb.v
-[ ] bad_mux_tb.v
+src/testbench/testbench.v
 ```
 
-## MUX RTL Files
+### Technology Libraries
 
 ```text
-[ ] good_mux.v
-[ ] bad_mux.v
+lib/avsdpll.lib
+lib/avsddac.lib
+lib/sky130_fd_sc_hd__tt_025C_1v80.lib
 ```
 
-## Netlist
+### Gate-Level Netlist
 
 ```text
-[ ] Final synthesized VSDBabySoC netlist
+netlist/babysoc_netlist.v
 ```
 
-## Simulation / Technology Models
+### MUX Files
 
 ```text
-[ ] Required SKY130 Verilog models
-[ ] Required PLL model
-[ ] Required DAC model
-[ ] Other files required for GLS
+mux/good_mux.v
+mux/bad_mux.v
 ```
 
-> Only add files that are actually required for reproducing the work and that can be legally redistributed.
-
----
-
-# 35. Screenshots to Add
-
-Place the screenshots inside the `images/` folder.
-
-The recommended screenshots are:
+### Images
 
 ```text
-[ ] Good MUX RTL simulation
-[ ] Good MUX RTL functional testing
-[ ] Good MUX GLS
-
-[ ] Bad MUX RTL simulation
-[ ] Bad MUX RTL functional testing
-[ ] Bad MUX GLS
-
-[ ] VSDBabySoC RTL simulation
-[ ] RTL loaded into Yosys
-[ ] Synthesis statistics
-[ ] Yosys structural check
-[ ] Technology mapping
-[ ] Synthesized design
-[ ] Generated netlist
-[ ] Pre-synthesis GLS
-[ ] Post-synthesis GLS
-[ ] Pre-synthesis vs post-synthesis comparison
+images/babysoc_rtl.png
+images/rvmyth_hierarchy.png
+images/synthesis_statistics.png
+images/abc_technology_mapping.png
+images/post_optimization_statistics.png
+images/pre_synth_gls.png
+images/post_synth_gls.png
 ```
 
 ---
 
-# 36. Evidence of Understanding
+## 32. Learning Outcome
 
-The repository is organized around the reasoning behind each stage of the flow rather than only presenting commands.
+This work provided practical understanding of how an RTL design progresses toward a technology-mapped gate-level implementation.
 
-The key relationships demonstrated are:
+The main flow studied was:
 
 ```text
 RTL Coding
-     │
-     ▼
-Simulation Behaviour
-     │
-     ▼
-Synthesis Interpretation
-     │
-     ▼
-Inferred Hardware
-     │
-     ▼
-Technology Mapping
-     │
-     ▼
-Gate-Level Netlist
-     │
-     ▼
-Gate-Level Simulation
-     │
-     ▼
-Functional Verification
-```
-
-This demonstrates the relationship between the RTL description, the synthesis process and the final hardware representation.
-
----
-
-# 37. Final Learning Outcome
-
-This work provided practical exposure to the complete RTL-to-gate-level digital design flow.
-
-The good_mux and bad_mux experiments provided an understanding of the relationship between RTL coding style and inferred hardware.
-
-The VSDBabySoC experiment extended this understanding to a larger design and covered:
-
-```text
-RTL Design
      ↓
 RTL Simulation
      ↓
 Functional Verification
      ↓
-Yosys Synthesis
+Synthesis
      ↓
 Logic Optimization
      ↓
 Sequential Cell Mapping
      ↓
-Combinational Technology Mapping
+Technology Mapping
      ↓
 Gate-Level Netlist
      ↓
 Gate-Level Simulation
      ↓
-Pre/Post Synthesis Comparison
+Functional Comparison
 ```
 
-The main learning is that successful RTL design is not limited to writing syntactically correct Verilog.
+The MUX experiments established the connection between RTL coding style and inferred hardware.
 
-A designer must also understand:
+The VSDBabySoC experiment extended this understanding to a larger hierarchical design and demonstrated the complete synthesis and GLS flow.
 
-- How RTL is interpreted by synthesis
-- What hardware is inferred
-- How optimization changes the design
-- How technology libraries affect the implementation
-- How a gate-level netlist differs from RTL
-- Why post-synthesis verification is necessary
+The main takeaway is that RTL design is not only about writing code that produces the expected simulation output. It is also necessary to understand how synthesis interprets the RTL, how optimization changes the implementation, how technology libraries influence the mapped hardware, and how the resulting gate-level implementation can be verified.
 
 ---
 
-# 38. Conclusion
+## 33. Conclusion
 
-The experiments documented in this repository demonstrate the transition from a high-level RTL description to a technology-mapped gate-level implementation.
+This repository documents the complete RTL-to-Gate-Level workflow using VSDBabySoC.
 
-The good_mux and bad_mux experiments demonstrate the importance of writing RTL that accurately describes the intended combinational behaviour.
+The work begins with RTL simulation and functional verification, proceeds through synthesis, optimization and technology mapping, and ends with gate-level netlist generation and GLS.
 
-The VSDBabySoC experiment demonstrates the larger synthesis flow, including RTL elaboration, optimization, sequential-cell mapping, technology mapping and netlist generation.
+The MUX experiments provide a smaller example of the relationship between RTL coding style and hardware inference, while VSDBabySoC demonstrates these concepts on a larger design.
 
-Finally, Gate-Level Simulation provides a way to verify that the synthesized implementation maintains the intended functional behaviour.
-
-The complete flow can therefore be summarized as:
+The overall flow can be summarized as:
 
 ```text
-                 RTL
-                  │
-                  ▼
-          RTL Verification
-                  │
-                  ▼
-              Synthesis
-                  │
-                  ▼
-            Optimization
-                  │
-                  ▼
-        Technology Mapping
-                  │
-                  ▼
-         Gate-Level Netlist
-                  │
-                  ▼
-                GLS
-                  │
-                  ▼
-        Functional Verification
+RTL
+ ↓
+Simulation
+ ↓
+Synthesis
+ ↓
+Optimization
+ ↓
+Technology Mapping
+ ↓
+Gate-Level Netlist
+ ↓
+GLS
+ ↓
+Functional Verification
 ```
 
-This repository represents my understanding of how RTL code is transformed into a technology-mapped implementation and how the resulting gate-level design can be verified.
+This repository demonstrates my understanding of how RTL code is transformed into a technology-specific gate-level implementation and how the resulting design can be verified after synthesis.
