@@ -69,8 +69,6 @@ The combinational block determines the next state and the next value of `detecte
 
 ### RTL Design
 
-Paste the RTL design code used for the assignment below:
-
 ```bash
 `timescale 1ns/1ps
 
@@ -193,8 +191,6 @@ The testbench:
 * Generates the `dump.vcd` waveform file.
 
 ### Testbench Code
-
-Paste the testbench used for the assignment below:
 
 ```bash
 `timescale 1ns/1ps
