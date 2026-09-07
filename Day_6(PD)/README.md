@@ -125,6 +125,8 @@ Timing Analysis
         ↓
 Synthesis Characterization
 ```
+<img width="614" height="394" alt="Screenshot 2026-09-07 214356" src="https://github.com/user-attachments/assets/8eec3390-1c30-4b7b-811d-de5dbb7f8716" />
+
 
 ---
 
