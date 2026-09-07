@@ -542,5 +542,3 @@ The reported negative WNS shows that although synthesis was successful, further 
 
 Overall, the exercise demonstrated how OpenLane connects **RTL design, technology-specific synthesis, report generation, timing analysis, and design characterization** within an ASIC implementation flow.
 
-```
-```
