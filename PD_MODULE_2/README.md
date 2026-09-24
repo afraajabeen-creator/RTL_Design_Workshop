@@ -1293,4 +1293,3 @@ Finally, timing characterization introduced timing thresholds, propagation delay
 
 Overall, this module helped establish a clear connection between the **logical representation of a digital design** and its **physical implementation**, providing a stronger understanding of the stages involved in transforming a synthesized design into a physical layout.
 
----
