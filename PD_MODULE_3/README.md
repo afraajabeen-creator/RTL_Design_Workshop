@@ -734,24 +734,24 @@ The output is logically inverted, while the finite transition intervals reveal t
  
 ### Rise Time
 
-Rise time (tᵣ) is the time required for a signal to move from a low voltage level to a high voltage level.
+Rise time (tr) is the time required for a signal to move from a low voltage level to a high voltage level.
 
 A common convention measures the interval between 10% and 90% of the voltage swing.
 
 For a signal with low level Vₗ and high level Vₕ, the threshold voltages are:
 
 $$
-V₁₀% = Vₗ + 0.1(Vₕ - Vₗ)
+V10% = Vl + 0.1(Vh - Vl)
 $$
 
 $$
-V₉₀% = Vₗ + 0.9(Vₕ - Vₗ)
+V90% = Vl + 0.9(Vh - Vl)
 $$
 
 The rise time is:
 
 $$
-tᵣ = t₉₀% - t₁₀%
+tr = t90% - t10%
 $$
 
 A shorter rise time represents a faster rising transition under the stated measurement conditions.
@@ -760,17 +760,17 @@ A shorter rise time represents a faster rising transition under the stated measu
 
 ### Fall Time
 
-Fall time (t𝒇) is the time required for a signal to move from a high voltage level to a low voltage level.
+Fall time (tf) is the time required for a signal to move from a high voltage level to a low voltage level.
 
 A common convention measures the interval between 90% and 10% of the voltage swing.
 
 The fall time is:
 
 $$
-t𝒇 = t₁₀% - t₉₀%
+tf = t10% - t90%
 $$
 
-Here, t₉₀% is the time at which the falling signal crosses the 90% threshold, and t₁₀% is the time at which it crosses the 10% threshold.
+Here, t90% is the time at which the falling signal crosses the 90% threshold, and t10% is the time at which it crosses the 10% threshold.
 
 The subtraction gives a positive time interval.
 
