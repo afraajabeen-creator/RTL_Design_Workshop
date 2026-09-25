@@ -34,7 +34,7 @@ The central design example is a CMOS inverter, a fundamental digital standard ce
 16. [Design Rule Checking (DRC)](#design-rule-checking-drc) 
 17. [Results and Observations](#results-and-observations) 
 18. [Conclusion](#conclusion) 
-19. [Image Index](#image-index) 
+
  
 --- 
  
@@ -738,22 +738,6 @@ Rise time (tr) is the time required for a signal to move from a low voltage leve
 
 A common convention measures the interval between 10% and 90% of the voltage swing.
 
-For a signal with low level Vₗ and high level Vₕ, the threshold voltages are:
-
-$$
-V10% = Vl + 0.1(Vh - Vl)
-$$
-
-$$
-V90% = Vl + 0.9(Vh - Vl)
-$$
-
-The rise time is:
-
-$$
-tr = t90% - t10%
-$$
-
 A shorter rise time represents a faster rising transition under the stated measurement conditions.
 
 ![Rise time measurement](images/18_rise_time.png)
@@ -763,12 +747,6 @@ A shorter rise time represents a faster rising transition under the stated measu
 Fall time (tf) is the time required for a signal to move from a high voltage level to a low voltage level.
 
 A common convention measures the interval between 90% and 10% of the voltage swing.
-
-The fall time is:
-
-$$
-tf = t10% - t90%
-$$
 
 Here, t90% is the time at which the falling signal crosses the 90% threshold, and t10% is the time at which it crosses the 10% threshold.
 
@@ -972,38 +950,4 @@ Transient analysis and timing measurements illustrate the distinction between ou
  
 Together, these topics establish a foundation for understanding standard-cell layout design, physical verification, and circuit characterization in VLSI physical design. 
  
---- 
- 
-## Image Index 
- 
-All screenshots are stored in the `images/` directory. 
- 
-| No. | Filename | Description | 
-|---:|---|---| 
-| 1 | `01_custom_sky130_cmos_inverter_layout.png` | Custom SKY130 CMOS inverter layout | 
-| 2 | `02_setting_up_magic.png` | Magic setup | 
-| 3 | `03_identifying_transistors.png` | Identifying transistors | 
-| 4 | `04_copied_sky130a_tech_file.png` | Copying the SKY130 technology file | 
-| 5 | `05_cmos_fabrication_step_02.png` | CMOS fabrication process, step 2 | 
-| 6 | `06_cmos_fabrication_step_03.png` | CMOS fabrication process, step 3 | 
-| 7 | `07_cmos_fabrication_step_04.png` | CMOS fabrication process, step 4 | 
-| 8 | `08_cmos_fabrication_step_05.png` | CMOS fabrication process, step 5 | 
-| 9 | `09_cmos_fabrication_step_06.png` | CMOS fabrication process, step 6 | 
-| 10 | `10_cmos_fabrication_step_07.png` | CMOS fabrication process, step 7 | 
-| 11 | `11_drc_error.png` | DRC error inspection | 
-| 12 | `12_creating_ext_and_spice_files.png` | Creating extraction and SPICE files | 
-| 13 | `13_sky130_inv_spice_file.png` | SKY130 inverter SPICE file | 
-| 14 | `14_sky130_inv_spice_file_edited.png` | Edited SKY130 inverter SPICE file | 
-| 15 | `15_running_ngspice.png` | Running ngspice | 
-| 16 | `16_transient_analysis.png` | Transient analysis waveform | 
-| 17 | `17_spice_deck.png` | SPICE deck | 
-| 18 | `18_rise_time.png` | Rise-time measurement | 
-| 19 | `19_fall_time.png` | Fall-time measurement | 
-| 20 | `20_cell_rise_delay.png` | Cell rise-delay measurement | 
-| 21 | `21_cell_fall_delay.png` | Cell fall-delay measurement | 
-| 22 | `22_met3_layer.png` | Metal 3 layer view | 
-| 23 | `23_m3_3c_test_structure.png` | Zoomed M3.3C test structure | 
-| 24 | `24_poly_9.png` | Poly.9 rule detail | 
-| 25 | `25_openlane_flow_reset_variable.png` | OpenLane flow reset variable | 
-```
 
