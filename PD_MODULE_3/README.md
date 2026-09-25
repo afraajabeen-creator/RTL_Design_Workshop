@@ -1,1096 +1,592 @@
-# PD_MODULE_3: SPICE-Based CMOS Characterization & the 16-Mask Fabrication Process
+
+# PD_MODULE_3
+# Design Library Cell Using Magic Layout and ngspice Characterization
 
 ## Overview
 
-Module 3 focuses on transistor-level CMOS characterization, semiconductor fabrication, and the physical implementation of a CMOS inverter using the SKY130 technology. It connects the electrical behavior of a standard cell with the fabrication steps that transform a silicon wafer into a functional integrated circuit.
+This module explores the physical design and electrical characterization of a CMOS inverter using the SKY130 Process Design Kit (PDK). It connects semiconductor device fundamentals with the practical steps involved in creating a layout, understanding process layers, checking layout geometry, extracting a circuit representation, and simulating its time-domain response.
 
-The module is divided into two major theory sections and a sequence of practical labs:
+The work begins with CMOS fabrication concepts and the complementary operation of PMOS and NMOS transistors. It then moves through the SKY130 technology setup in Magic, construction and inspection of a custom inverter layout, Design Rule Checking (DRC), extraction of layout information, SPICE deck preparation, and transient analysis using ngspice.
 
-* Theory 1 — SPICE-Based CMOS Characterization: Introduces SPICE netlists and explains how a CMOS inverter is analyzed to determine its static behavior, including the switching threshold (VMV_MVM), and its dynamic behavior, including rise delay, fall delay, and transition times.
+Timing characteristics, including rise time, fall time, cell rise delay, and cell fall delay, are examined from the simulated response.
 
-* Theory 2 — The 16-Mask CMOS Fabrication Process: Explains how a silicon wafer is processed through successive masking, doping, oxidation, deposition, etching, and metallization steps to form a CMOS inverter.
+The central design example is a CMOS inverter, a fundamental digital standard cell whose behavior illustrates the relationship between transistor-level design, physical layout, parasitic effects, and circuit performance.
 
-* Practical Labs: Cover physical design configuration, setting up Magic with the SKY130 technology file, identifying transistor layers, extracting a SPICE netlist from a layout, locating device models, correcting the extracted netlist, running transient simulations in ngspice, measuring timing parameters, and examining the Metal3 and Poly design-rule decks.
-
-The practical work demonstrates how the geometry of a physical layout is converted into an electrical circuit representation and how the extracted circuit can be simulated to study its switching behavior.
+---
 
 ## Contents
 
-1. SPICE Deck Basics
+1. [Introduction](#introduction)
+2. [Objectives](#objectives)
+3. [Semiconductor Fabrication and CMOS Technology](#semiconductor-fabrication-and-cmos-technology)
+4. [CMOS Inverter: Structure and Operation](#cmos-inverter-structure-and-operation)
+5. [Tools and Technology Files](#tools-and-technology-files)
+6. [SKY130 Technology Setup in Magic](#sky130-technology-setup-in-magic)
+7. [Custom CMOS Inverter Layout](#custom-cmos-inverter-layout)
+8. [Physical Layers and Layout Inspection](#physical-layers-and-layout-inspection)
+9. [Design Rule Checking (DRC)](#design-rule-checking-drc)
+10. [Layout Extraction and SPICE Generation](#layout-extraction-and-spice-generation)
+11. [SPICE Deck and Device Models](#spice-deck-and-device-models)
+12. [Transient Analysis with ngspice](#transient-analysis-with-ngspice)
+13. [Rise Time and Fall Time](#rise-time-and-fall-time)
+14. [Cell Rise Delay and Cell Fall Delay](#cell-rise-delay-and-cell-fall-delay)
+15. [OpenLane Flow Configuration](#openlane-flow-configuration)
+16. [Results and Observations](#results-and-observations)
+17. [Conclusion](#conclusion)
+18. [Image Index](#image-index)
 
-2. Static Behavior — Switching Threshold (VMV_MVM)
+---
 
-3. Dynamic Behavior — Rise Delay, Fall Delay, and Transition Times
+## Introduction
 
-4. The 16-Mask CMOS Fabrication Process
+Physical design converts a circuit's logical and electrical description into geometric shapes on semiconductor layers. The layout defines where devices are formed and how their terminals are interconnected. Since fabrication follows physical patterns, the geometry must satisfy the manufacturing constraints of the selected process.
 
-   * 4.1 Substrate Selection
+CMOS (Complementary Metal-Oxide-Semiconductor) technology uses complementary NMOS and PMOS transistors to implement logic functions. A CMOS inverter is a basic logic cell: it produces a high output for a low input and a low output for a high input.
 
-   * 4.2 Active Region Formation
+Although its logical function is simple, its physical implementation involves transistor regions, gate material, contacts, metal routing, wells, supply connections, and process-specific geometric rules.
 
-   * 4.3 N-Well and P-Well Formation
+The SKY130 PDK provides technology definitions and device information for designing with the SKY130 process. Magic uses the technology definitions to create and inspect layout geometry and perform design-rule checks.
 
-   * 4.4 Gate Formation
+Layout extraction produces an electrical representation that can be used in a SPICE simulation. ngspice then evaluates the circuit response over time, making it possible to study switching transitions and timing parameters.
 
-   * 4.5 Lightly Doped Drain Formation
+This module follows that flow from CMOS fundamentals to layout-level simulation and characterization.
 
-   * 4.6 Source and Drain Formation
+---
 
-   * 4.7 Local Interconnect and Contact Formation
+## Objectives
 
-   * 4.8 Higher-Level Metal Formation
+- Understand the fundamentals of semiconductor fabrication and CMOS technology.
+- Explain the complementary operation of PMOS and NMOS transistors.
+- Understand the structure and Boolean function of a CMOS inverter.
+- Identify the role of the SKY130 Process Design Kit and technology file.
+- Set up the Magic layout environment for the selected technology.
+- Create and inspect a custom CMOS inverter layout.
+- Recognize polysilicon, active, contact, and metal interconnect layers.
+- Understand Design Rule Checking and interpret layout violations.
+- Extract layout connectivity and parasitic information.
+- Prepare a SPICE representation for circuit-level simulation.
+- Run transient analysis in ngspice and inspect input/output waveforms.
+- Understand rise time, fall time, and propagation delay.
+- Relate physical geometry and parasitic effects to circuit timing.
 
-5. Labs
+---
 
-   * Lab 1 — Physical Design Configuration
+## Semiconductor Fabrication and CMOS Technology
 
-   * Lab 2 — Setting Up Magic with the SKY130 Standard-Cell Design
+### Semiconductor Devices
 
-   * Lab 3 — Identifying Transistor Layers
+A semiconductor is a material whose electrical conductivity lies between that of a conductor and an insulator and can be controlled through doping, electric fields, temperature, and illumination.
 
-   * Lab 4 — Extracting a SPICE Netlist from the Layout
+Silicon is widely used in integrated-circuit manufacturing because its material properties and mature fabrication processes support dense, reliable electronic devices.
 
-   * Lab 5 — Locating SKY130 Device Models
+Doping introduces controlled concentrations of impurities into semiconductor material.
 
-   * Lab 6 — Correcting the Extracted Netlist and Running ngspice
+- **N-type semiconductor:** Contains donor impurities that contribute electrons as majority carriers.
+- **P-type semiconductor:** Contains acceptor impurities that create holes as majority carriers.
 
-   * Lab 7 — Transient Analysis and Timing Characterization
+These regions form the basis of MOS transistor structures.
 
-   * Lab 8 — Exploring the DRC Rule Deck
+### MOSFET Fundamentals
 
-6. Conclusion
+A MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor) is a voltage-controlled device. Its gate voltage controls the formation of a conductive channel between the source and drain terminals.
 
-# 1. SPICE Deck Basics
+A MOSFET has four principal terminals:
 
-SPICE (Simulation Program with Integrated Circuit Emphasis) is a circuit simulation framework used to analyze the electrical behavior of electronic circuits. It allows transistor-level circuits to be represented through a netlist and evaluated under different operating conditions.
+- **Gate (G):** Controls channel formation through the applied electric field.
+- **Drain (D):** One terminal of the channel through which current flows.
+- **Source (S):** The other channel terminal.
+- **Body (B):** The semiconductor region in which the device is formed.
 
-A SPICE netlist contains the information required to describe a circuit and define the simulation to be performed.
+The operating behavior depends on device type, terminal voltages, dimensions, threshold voltage, and process parameters.
 
-### 1.1 Fundamental Components of a SPICE Netlist
+### NMOS and PMOS Transistors
 
-A SPICE netlist is built around three essential types of information:
+**NMOS** devices use an electron-conduction channel. In a typical enhancement-mode NMOS transistor, a sufficiently positive gate-to-source voltage forms a channel and allows current to flow between drain and source.
 
-1. Connectivity: Specifies the electrical nodes to which the terminals of each component are connected.
+**PMOS** devices use a hole-conduction channel. In a typical enhancement-mode PMOS transistor, a sufficiently negative gate-to-source voltage relative to its source turns the device on.
 
-2. Component Parameters: Defines values such as resistance, capacitance, supply voltage, transistor width, and transistor length.
+In CMOS logic, the NMOS transistor commonly forms the pull-down network, while the PMOS transistor forms the pull-up network. Their complementary control reduces static power consumption in ideal steady-state logic, apart from leakage and other non-ideal effects.
 
-3. Device Model Identification: Specifies the model that represents the electrical behavior of each transistor or semiconductor device.
+### CMOS Fabrication
 
-These three elements allow the simulator to construct the circuit equations and calculate the electrical response.
+CMOS fabrication builds transistor structures and interconnects through a sequence of process operations. The exact sequence depends on the fabrication technology and its process integration.
 
-### 1.2 CMOS Inverter SPICE Representation
+Typical operations include:
 
-A CMOS inverter consists of a PMOS transistor and an NMOS transistor connected in a complementary arrangement.
+1. Wafer preparation and surface cleaning.
+2. Formation of wells and isolation regions.
+3. Deposition or growth of thin films.
+4. Photolithography to pattern selected regions.
+5. Etching to remove material from exposed regions.
+6. Doping or implantation to establish device regions.
+7. Gate, spacer, source, and drain formation.
+8. Contact formation and interconnect patterning.
+9. Passivation and final processing.
 
-For the example used to introduce SPICE characterization, the transistor dimensions are:
+## The 16-Mask CMOS Fabrication Process
 
-Wp=Wn=0.375 μmW_p=W_n=0.375\,\mu mWp=Wn=0.375μm
+Fabricating a CMOS inverter begins with a bare silicon wafer and gradually builds the transistor structures and interconnections required for circuit operation.
 
-Lp=Ln=0.25 μmL_p=L_n=0.25\,\mu mLp=Ln=0.25μm
+The process involves a sequence of photolithography, oxidation, doping, deposition, etching, and metallization operations. Each mask defines a particular pattern that is transferred onto the wafer during fabrication.
 
-The circuit description includes:
+The complete process can be divided into eight major stages, covering the formation of the active regions, wells, transistor gates, source and drain regions, local interconnects, and higher-level metal layers.
 
-* A PMOS transistor connected to the positive supply.
+The following sections describe the major fabrication stages and explain how the individual operations contribute to the formation of a CMOS integrated circuit.
 
-* An NMOS transistor connected to ground.
+### 1. Substrate Selection
 
-* A common gate node that acts as the input.
+The fabrication process begins with a silicon wafer that serves as the foundation for the integrated circuit.
 
-* A common drain node that acts as the output.
+For the process described in the reference example, a **p-type silicon substrate** is selected. The substrate provides the physical base on which the transistor structures and other semiconductor regions are formed.
 
-* A load capacitance connected to the output.
+The electrical properties of the substrate depend on its doping concentration and crystal orientation.
 
-* A DC supply voltage.
+The reference example specifies a relatively lightly doped substrate with a concentration on the order of \(10^{15}\ \text{cm}^{-3}\) and a `<100>` crystal orientation.
 
-* An input voltage source.
+The `<100>` orientation is commonly used in silicon fabrication because of its favorable properties for forming silicon–oxide interfaces.
 
-* Simulation commands to specify the type of analysis.
+Before the fabrication sequence begins, the wafer is cleaned to remove contaminants and prepare the surface for subsequent processing.
 
-### 1.3 Common SPICE Analysis Commands
+**Purpose of this stage:**
 
-|
-Command
+- Provides the semiconductor foundation for the CMOS devices.
+- Establishes the initial substrate doping and crystal orientation.
+- Prepares a clean surface for the formation of active regions and wells.
 
-|
+### 2. Creating the Active Region (Mask 1)
 
-Purpose
+The first mask defines the active regions in which transistor structures will eventually be formed.
 
-|
-| --- | --- |
-|
+A stack of silicon dioxide (SiO₂), silicon nitride (Si₃N₄), and photoresist is prepared on the wafer surface.
 
-`.op`
+In the reference process, the approximate thicknesses are:
 
-|
+- Silicon dioxide: 40 nm
+- Silicon nitride: 80 nm
+- Photoresist: 1 µm
 
-Calculates the DC operating point of the circuit.
+The photoresist is exposed through **Mask 1** and developed to create the desired pattern.
 
-|
-|
+The patterned oxide and nitride layers protect selected portions of the wafer during the subsequent oxidation process.
 
-`.dc`
+Field oxide is then grown in the exposed regions using **LOCOS (Local Oxidation of Silicon)**.
 
-|
+During LOCOS oxidation, oxide grows laterally beneath the edge of the nitride mask. This produces a tapered region commonly known as the **bird's beak**.
 
-Performs a DC voltage or current sweep.
+The bird's-beak effect is a characteristic feature of LOCOS isolation and results from the lateral encroachment of oxide beneath the masking structure.
 
-|
-|
+After oxidation, the silicon nitride layer is removed, leaving the intended active regions separated by field oxide.
 
-`.tran`
+**Purpose of this stage:**
 
-|
+- Defines the regions reserved for transistor formation.
+- Creates field oxide for electrical isolation between active areas.
+- Establishes the initial geometry of the device regions.
 
-Computes the time-dependent response of the circuit.
+![CMOS fabrication process, step 2](images/05_cmos_fabrication_step_02.png)
 
-|
-|
+### 3. N-Well and P-Well Formation (Mask 2)
 
-`.include`
+CMOS technology requires both NMOS and PMOS transistors on the same integrated circuit.
 
-|
+These transistors are formed in semiconductor regions with different doping types.
 
-Includes an external model or circuit file.
+In the reference process, **Mask 2** is used during the well-formation stage to define the regions for the required well implants.
 
-|
-|
+Boron is used to form the p-well, while phosphorus is used to form the n-well.
 
-`.control`
+The wafer undergoes ion implantation, introducing dopant atoms into the selected semiconductor regions.
 
-|
+Following implantation, a high-temperature drive-in diffusion process redistributes the dopants and helps activate them electrically.
 
-Defines a sequence of simulator commands.
+This produces the n-well and p-well regions required for the formation of complementary MOS transistors.
 
-|
-|
+The NMOS transistor is formed in the p-well region, while the PMOS transistor is formed in the n-well region.
 
-`.end`
+**Purpose of this stage:**
 
-|
+- Establishes the semiconductor regions needed for NMOS and PMOS devices.
+- Provides the appropriate doping environments for complementary transistor operation.
+- Supports the formation of CMOS devices on the same wafer.
 
-Marks the end of a SPICE netlist.
+![CMOS fabrication process, step 3](images/06_cmos_fabrication_step_03.png)
 
-|
+### 4. Gate Formation (Masks 4, 5, and 6)
 
-The DC operating point provides the steady-state node voltages and currents. A DC sweep helps obtain the inverter's voltage-transfer characteristic, while transient analysis reveals how the circuit responds to changing input signals.
+The gate structure controls the formation of the conducting channel between the source and drain terminals of a MOS transistor.
 
-### 1.4 Handwritten and Layout-Extracted Netlists
+Gate formation begins with surface preparation and threshold-voltage adjustment.
 
-A manually written SPICE netlist specifies the circuit topology, transistor dimensions, model names, and other parameters explicitly.
+A sacrificial oxide layer may be used during the preparation process and subsequently removed using dilute hydrofluoric acid (HF).
 
-When the netlist is extracted from a Magic layout, the extraction tool derives the circuit connectivity and device geometry from the physical shapes. Parameters such as transistor dimensions and source/drain diffusion geometry can be obtained from the layout.
+Implantation steps are used to adjust the threshold-voltage characteristics of the transistor devices.
 
-However, the extracted netlist may use internal model identifiers generated by the layout tool rather than the model names expected by the available SKY130 libraries. Additional editing may therefore be required to connect the extracted devices to the correct transistor models and simulation setup.
+In the reference process, Masks 4 and 5 are associated with the threshold-adjustment implants for the transistor regions.
 
-This distinction is central to the practical characterization workflow.
+A thin gate oxide is formed over the channel region, followed by the deposition of polysilicon.
 
-# 2. Static Behavior — Switching Threshold (VMV_MVM)
+The polysilicon is doped to reduce its electrical resistance.
 
-The static behavior of a CMOS inverter is described by its voltage-transfer characteristic (VTC), which represents the relationship between the input voltage and the output voltage.
+**Mask 6** defines the gate pattern. The exposed polysilicon is etched to create the final gate structures.
 
-The input voltage is plotted on the horizontal axis, while the output voltage is plotted on the vertical axis.
+The gate is positioned over the channel region between the source and drain, allowing the applied gate voltage to control channel conduction.
 
-As the input voltage increases from 0 V toward VDDV_{DD}VDD, the inverter transitions from a logic-high output to a logic-low output.
+**Purpose of this stage:**
 
-## 2.1 Operating Regions of a CMOS Inverter
+- Establishes the gate dielectric and gate electrode.
+- Defines the channel-control structure of the MOS transistor.
+- Helps determine the transistor's electrical characteristics, including threshold voltage and channel dimensions.
 
-The inverter passes through five operating regions as the input voltage rises:
+![CMOS fabrication process, step 4](images/07_cmos_fabrication_step_04.png)
 
-1. PMOS in linear region, NMOS OFF: The PMOS conducts and pulls the output toward the supply voltage.
+### 5. Lightly Doped Drain (LDD) Formation (Masks 7 and 8)
 
-2. PMOS in linear region, NMOS in saturation: The NMOS begins conducting while the PMOS remains in the linear region.
+Lightly Doped Drain (LDD) structures are introduced to improve transistor behavior, particularly in devices where strong electric fields occur near the drain region.
 
-3. Both PMOS and NMOS in saturation: Both transistors conduct strongly during the switching region.
+As transistor dimensions decrease, the electric field near the drain can become sufficiently strong to produce undesirable effects.
 
-4. PMOS in saturation, NMOS in linear region: The NMOS increasingly pulls the output toward ground.
+Two important effects are:
 
-5. PMOS OFF, NMOS in linear region: The NMOS conducts and holds the output near ground.
+**Hot-electron effect**
 
-The transition between these regions determines the shape and position of the voltage-transfer curve.
+Carriers accelerated by a strong electric field can gain enough energy to damage the device structure or become trapped in the gate dielectric, potentially degrading transistor performance over time.
 
-## 2.2 Switching Threshold (VMV_MVM)
+**Short-channel effect**
 
-The switching threshold, denoted by VMV_MVM, is the point on the voltage-transfer characteristic where the input and output voltages are equal.
+When the channel becomes very short, the drain electric field can influence the channel region and reduce the gate's ability to control the transistor.
 
-Vin=Vout=VMV_{in}=V_{out}=V_MVin=Vout=VM
+LDD structures reduce the abruptness of the doping transition near the drain and help manage the electric field.
 
-At this point, the currents through the PMOS and NMOS devices balance in magnitude, with opposite current directions under the usual sign convention:
+In the reference process:
 
-IDSp=−IDSnI_{DSp}=-I_{DSn}IDSp=−IDSn
+- **Mask 7** is used for the phosphorus implant that forms the lightly doped n-type regions.
+- **Mask 8** is used for the boron implant that forms the lightly doped p-type regions.
 
-The switching threshold indicates the balance between the pull-up and pull-down networks.
+Sidewall spacers are subsequently formed along the gate edges.
 
-## 2.3 Influence of Transistor Sizing
+These spacers are typically created by depositing a dielectric material and performing anisotropic etching, leaving material along the sides of the gate.
 
-The switching threshold depends on the relative strengths of the PMOS and NMOS transistors.
+The spacers help control the position of the heavier source and drain implants performed in the next stage.
 
-For the matched device pair:
+**Purpose of this stage:**
 
-WnLn=WpLp=1.5\frac{W_n}{L_n}=\frac{W_p}{L_p}=1.5LnWn=LpWp=1.5
+- Creates lightly doped extensions near the channel.
+- Helps reduce electric-field-related effects near the drain.
+- Establishes the geometry required for the subsequent source and drain implants.
 
-the switching threshold is approximately near the midpoint of the supply voltage. In the example discussed in the reference material, the threshold is around 0.98 V for a 2.5 V analysis.
+![CMOS fabrication process, step 5](images/08_cmos_fabrication_step_05.png)
 
-When the PMOS width is increased while the NMOS dimensions remain unchanged, the pull-up network becomes stronger. The switching threshold consequently shifts toward a higher input voltage.
+### 6. Source and Drain Formation (Masks 9 and 10)
 
-For example, with:
+The source and drain regions provide the electrical terminals through which current enters and leaves the MOS transistor channel.
 
-WpLp=3.75\frac{W_p}{L_p}=3.75LpWp=3.75
+After the gate and sidewall spacers are formed, the source and drain regions are created using heavier doping.
 
-and
+A thin screen oxide may be grown before implantation to help reduce ion channeling during the doping process.
 
-WnLn=1.5\frac{W_n}{L_n}=1.5LnWn=1.5
+The reference process uses two implantation steps:
 
-the switching threshold is approximately 1.2 V in the example.
+- Arsenic implantation for the n-type source and drain regions of NMOS devices.
+- Boron implantation for the p-type source and drain regions of PMOS devices.
 
-PMOS devices are often made wider than NMOS devices because hole mobility is lower than electron mobility in typical silicon MOSFETs. Increasing the PMOS width helps compensate for the difference in drive strength and can improve the balance between the pull-up and pull-down networks.
+The gate and sidewall spacers help determine the placement of the heavily doped regions relative to the channel.
 
-# 3. Dynamic Behavior — Rise Delay, Fall Delay, and Transition Times
+After implantation, a high-temperature annealing process activates the dopants and helps repair damage caused by implantation.
 
-While the switching threshold describes the static behavior of a CMOS inverter, its transient response describes how quickly the output changes when the input switches.
+The resulting source and drain regions provide conductive terminals on either side of the channel.
 
-Dynamic characterization is performed by applying a time-varying input signal and observing the output response through a transient SPICE simulation.
+**Purpose of this stage:**
 
-Two important groups of timing parameters are measured:
+- Forms the heavily doped source and drain regions.
+- Establishes the electrical terminals of the transistor.
+- Completes the principal semiconductor regions required for MOSFET operation.
 
-* Transition times: Describe how long the output signal takes to move between voltage levels during a rising or falling edge.
+![CMOS fabrication process, step 6](images/09_cmos_fabrication_step_06.png)
 
-* Propagation delays: Describe the time difference between a specified input transition and the corresponding output transition.
+### 7. Local Interconnect and Contact Formation (Mask 11)
 
-These parameters provide information about the switching speed of the inverter and its suitability for digital circuit operation.
+Once the transistor structures are formed, electrical connections must be established between the gate, source, and drain terminals.
 
-## 3.1 Transition Time
+The local interconnect stage creates short-range electrical connections between device terminals and the interconnect system.
 
-Transition time measures the duration of an output voltage transition.
+A dielectric layer covering the transistor regions is selectively opened to expose the required contact areas.
 
-The rise transition time describes the low-to-high output transition, while the fall transition time describes the high-to-low output transition.
-
-A common characterization convention measures transition time between the 20% and 80% points of the voltage swing.
-
-For a rising transition:
-
-tr=t80%−t20%t_r=t_{80\%}-t_{20\%}tr=t80%−t20%
-
-For a falling transition:
-
-tf=t20%−t80%t_f=t_{20\%}-t_{80\%}tf=t20%−t80%
-
-In the falling transition equation, the 20% crossing occurs after the 80% crossing, resulting in a positive time interval.
-
-The voltage thresholds are determined from the signal's low and high voltage levels.
-
-## 3.2 Propagation Delay
-
-Propagation delay measures the time taken for a change at the input to produce a corresponding change at the output.
-
-A common convention measures the delay between the 50% voltage crossing of the input transition and the 50% crossing of the corresponding output transition.
-
-For a CMOS inverter:
-
-* A falling input transition produces a rising output transition.
-
-* A rising input transition produces a falling output transition.
-
-### Cell Rise Delay
-
-Cell rise delay, represented by tPLHt_{PLH}tPLH, is the delay associated with the output changing from low to high.
-
-### Cell Fall Delay
-
-Cell fall delay, represented by tPHLt_{PHL}tPHL, is the delay associated with the output changing from high to low.
-
-The average propagation delay is:
-
-tpd=tPLH+tPHL2t_{pd}=\frac{t_{PLH}+t_{PHL}}{2}tpd=2tPLH+tPHL
-
-## 3.3 Importance of Timing Characterization
-
-Transition time and propagation delay describe different aspects of circuit performance.
-
-Transition time influences the sharpness of signal edges and the time required for the output to reach its final logic level.
-
-Propagation delay determines the timing relationship between successive logic stages and is an important parameter in static timing analysis.
-
-Both parameters are affected by transistor sizing, supply voltage, load capacitance, parasitic resistance, parasitic capacitance, and input transition characteristics.
-
-# 4. The 16-Mask CMOS Fabrication Process
-
-CMOS fabrication transforms a silicon wafer into an integrated circuit through a series of carefully controlled manufacturing operations.
-
-The process involves forming transistor regions, defining gate structures, creating source and drain regions, establishing electrical contacts, and building multiple metal interconnect layers.
-
-A 16-mask fabrication sequence uses a set of patterned masks to define the physical structures of the CMOS devices and their interconnections.
-
-The process can be organized into eight major stages.
-
-## 4.1 Substrate Selection
-
-The fabrication process begins with a silicon wafer that provides the base material for the integrated circuit.
-
-In the process example, a p-type silicon substrate is selected with a doping concentration of approximately:
-
-1015 cm−310^{15}\,\text{cm}^{-3}1015cm−3
-
-The wafer has a `<100>` crystal orientation.
-
-This orientation is commonly selected for MOS fabrication because the silicon–oxide interface can exhibit favorable electrical characteristics, including a relatively low density of interface traps under appropriate processing conditions.
-
-The substrate provides the foundation in which the transistor structures and well regions are formed.
-
-## 4.2 Creating the Active Region — Mask 1
-
-The active-region formation stage defines the areas in which transistor structures will later be fabricated.
-
-A stack of oxide, silicon nitride, and photoresist is formed over the silicon wafer.
-
-The example process uses approximately:
-
-* 40 nm of silicon dioxide (SiO2\text{SiO}_2SiO2).
-
-* 80 nm of silicon nitride (Si3N4\text{Si}_3\text{N}_4Si3N4).
-
-* 1 µm of photoresist.
-
-Mask 1 is used to pattern the required regions.
-
-The silicon nitride and oxide layers act as protective barriers during the subsequent oxidation process.
-
-### Local Oxidation of Silicon (LOCOS)
-
-The exposed regions undergo field oxidation through the LOCOS process.
-
-LOCOS forms thick field oxide in selected regions to provide isolation between active device areas.
-
-One characteristic of this process is the formation of a bird's beak, which is a tapered lateral extension of the oxide beneath the edge of the nitride mask.
-
-The bird's-beak effect results from lateral oxidation and influences the dimensions of the active region.
-
-After oxidation, the silicon nitride layer is removed, commonly using hot phosphoric acid.
-
-### Fabrication Images
-
-CMOS fabrication process — step 2
-
-CMOS fabrication process — step 3
-
-## 4.3 N-Well and P-Well Formation — Mask 2
-
-The formation of N-well and P-well regions enables both NMOS and PMOS transistors to be fabricated on the same silicon wafer.
-
-This arrangement is commonly referred to as a twin-well or twin-tub process.
-
-The process uses controlled implantation to establish the required semiconductor regions.
-
-* Boron implantation forms the P-well region.
-
-* Phosphorus implantation forms the N-well region.
-
-The implantation process introduces dopant atoms into selected regions of the substrate.
-
-### Drive-In Diffusion
-
-After implantation, the wafer undergoes a high-temperature drive-in diffusion process.
-
-This thermal treatment allows dopants to diffuse deeper into the silicon and helps activate the implanted impurities.
-
-The resulting N-well and P-well regions provide the semiconductor environments required for the NMOS and PMOS devices.
-
-### Fabrication Images
-
-CMOS fabrication process — step 4
-
-CMOS fabrication process — step 5
-
-## 4.4 Gate Formation — Masks 4, 5, and 6
-
-The gate formation stage defines the structures that control the conductive channels of the MOS transistors.
-
-The threshold voltage of a MOSFET depends on parameters such as substrate doping concentration and gate oxide capacitance.
-
-The gate oxide capacitance per unit area is represented by:
-
-Cox=εoxtoxC_{ox}=\frac{\varepsilon_{ox}}{t_{ox}}Cox=toxεox
-
-where:
-
-* εox\varepsilon_{ox}εox is the permittivity of the gate oxide.
-
-* toxt_{ox}tox is the gate oxide thickness.
-
-### Gate Region Preparation
-
-A sacrificial oxide layer is removed using dilute hydrofluoric acid (HF).
-
-The transistor gate regions are then prepared through selective doping operations.
-
-In the example process:
-
-* Mask 4 is associated with boron implantation.
-
-* Mask 5 is associated with arsenic implantation.
-
-* Mask 6 defines the final polysilicon gate pattern.
-
-The polysilicon layer is deposited and doped to reduce its electrical resistance.
-
-Photolithography and etching are then used to define the gate geometry.
-
-### Importance of Gate Formation
-
-The gate controls the electric field that determines whether a conductive channel forms between the source and drain.
-
-Gate dimensions and material properties influence the transistor's electrical characteristics, including its switching behavior and drive strength.
-
-### Fabrication Images
-
-CMOS fabrication process — step 6
-
-CMOS fabrication process — step 7
-
-## 4.5 Lightly Doped Drain (LDD) Formation — Masks 7 and 8
-
-Lightly Doped Drain formation introduces lower-concentration doped regions near the transistor channel before the heavily doped source and drain regions are created.
-
-The LDD structure helps reduce electric-field-related reliability problems in scaled MOSFETs.
-
-### Purpose of LDD
-
-Two important effects are addressed by LDD structures:
-
-Hot-Carrier Effects
-
-When carriers move through a strong electric field near the drain, they can gain sufficient energy to cause impact-related damage and contribute to long-term device degradation.
-
-Short-Channel Effects
-
-As transistor dimensions decrease, the electric field from the drain can influence the channel region more strongly, reducing the gate's control over the device.
-
-LDD structures help reduce the severity of these effects by introducing a more gradual doping profile near the drain.
-
-### Implantation and Spacer Formation
-
-In the example process:
-
-* Mask 7 is used for phosphorus implantation.
-
-* Mask 8 is used for boron implantation.
-
-These steps form the lightly doped N-type and P-type regions.
-
-Sidewall spacers are then formed along the gate edges.
-
-The spacers are created through dielectric deposition followed by anisotropic plasma etching. They establish the separation between the gate and the subsequent heavily doped source/drain implants.
-
-### Fabrication Image
-
-LDD formation
-
-## 4.6 Source and Drain Formation — Masks 9 and 10
-
-The source and drain regions provide the terminals through which current enters and leaves the MOS transistor channel.
-
-After the lightly doped regions and sidewall spacers have been formed, the heavily doped source and drain regions are created.
-
-### Implantation Process
-
-A thin screen oxide layer is grown before implantation to reduce channeling effects.
-
-The process uses two major implantation steps:
-
-* Arsenic implantation on the NMOS side.
-
-* Boron implantation on the PMOS side.
-
-These implants form the heavily doped source and drain regions.
-
-### Annealing
-
-A high-temperature annealing process follows implantation.
-
-Annealing activates the dopant atoms and helps repair damage introduced into the silicon during ion implantation.
-
-The resulting source and drain regions provide the required conductivity for transistor operation.
-
-### Fabrication Image
-
-Source and drain formation
-
-## 4.7 Local Interconnect and Contact Formation — Mask 11
-
-After transistor formation, electrical connections must be established between the source, drain, gate, and subsequent interconnect layers.
-
-The local interconnect stage forms short-range electrical connections between nearby device terminals.
-
-### Contact Region Preparation
-
-A thin oxide layer covering the source, drain, and gate regions is selectively removed using hydrofluoric acid.
-
-This exposes the required contact regions.
+In the reference process, a thin oxide layer is removed using HF to expose the relevant silicon surfaces.
 
 Titanium is then deposited over the wafer.
 
-### Titanium-Based Contact Formation
+During a subsequent annealing process, titanium reacts with silicon at the appropriate interfaces to form a conductive silicide layer.
 
-The wafer undergoes an annealing process at approximately 650–700 °C in a nitrogen ambient for around 60 seconds in the example process.
+The reference example describes a titanium-based local-interconnect process involving a nitrogen ambient and an annealing temperature of approximately 650–700 °C.
 
-The titanium reacts with the exposed silicon and forms conductive titanium-based contact structures.
+**Mask 11** defines the relevant contact or local-interconnect regions.
 
-Titanium nitride (TiN) is used as part of the local interconnect and contact structure.
+These contacts provide electrical access to the transistor terminals and establish connections to the higher-level interconnect structure.
 
-Mask 11 defines the locations of the required contact regions.
+**Purpose of this stage:**
 
-### Purpose of Local Interconnect
+- Creates electrical contacts to the transistor terminals.
+- Establishes local connections between device regions.
+- Prepares the circuit for higher-level metal routing.
 
-Local interconnect provides short-distance electrical connections between device terminals before signals are routed through the higher-level metal layers.
+![CMOS fabrication process, step 7](images/10_cmos_fabrication_step_07.png)
 
-This stage establishes the electrical connection between the transistor structures and the interconnect stack.
+### 8. Higher-Level Metal Formation (Masks 12–16)
 
-## 4.8 Higher-Level Metal Formation — Masks 12 to 16
+After the transistor contacts and local interconnects are formed, additional metal layers are constructed to connect the devices into a complete integrated circuit.
 
-The higher-level metal formation stage builds the interconnect network that allows individual transistors to operate as part of a complete integrated circuit.
+These layers provide the routing paths needed to connect individual transistors and circuit blocks.
 
-This stage involves dielectric deposition, contact formation, metal patterning, planarization, and passivation.
+The process involves repeated cycles of dielectric deposition, contact-hole formation, metal deposition, patterning, and planarization.
 
-### Mask 12 — Contact Plug Formation
+**Mask 12 — Contact and Plug Formation**
 
-A dielectric layer, such as phosphosilicate glass (PSG) or borophosphosilicate glass (BPSG), is deposited over the wafer.
+A dielectric layer is deposited over the existing structures and planarized using Chemical Mechanical Planarization (CMP).
 
-Chemical Mechanical Planarization (CMP) is used to create a more uniform surface.
+Contact holes are formed in the dielectric, and conductive materials such as titanium nitride and tungsten are used to create contact plugs.
 
-A titanium nitride barrier layer and tungsten fill are used to form contact plugs.
+CMP removes excess material and produces a more uniform surface for subsequent processing.
 
-The surface is then planarized through another CMP operation.
+**Metal 1 Formation**
 
-### Metal 1 Formation
+A metal layer is deposited and patterned to form the first major interconnect level.
 
-Aluminum is deposited and patterned to create the first metal interconnect layer.
+This layer provides connections between transistor terminals and other circuit elements.
 
-The metal layer connects the transistor terminals and local interconnect structures according to the circuit design.
+**Mask 14 — Higher-Level Contact Formation**
 
-### Mask 14 — Interlayer Contact Formation
+An additional dielectric layer is deposited and planarized.
 
-An additional silicon dioxide dielectric layer is deposited and planarized.
+Mask 14 defines the contact openings required to connect the next interconnect level to the underlying metal.
 
-Mask 14 defines contact openings through this dielectric layer.
+The contact holes are filled with conductive material, creating vertical electrical connections between layers.
 
-The contact openings are filled with conductive material, commonly using a barrier layer and tungsten fill.
+**Mask 15 — Next Metal Pattern**
 
-### Mask 15 — Higher-Level Metal Patterning
+Mask 15 defines the next metal routing pattern.
 
-Mask 15 defines the next metal interconnect pattern.
+This metal level extends the interconnect network and allows connections to be routed across a larger area of the chip.
 
-This layer extends the electrical routing network and allows signals to connect between different regions of the integrated circuit.
+**Mask 16 — Final Passivation Opening**
 
-### Mask 16 — Final Passivation Opening
+A protective passivation layer, commonly formed using a dielectric such as silicon nitride, is deposited over the completed interconnect stack.
 
-A silicon nitride passivation layer is deposited over the completed interconnect stack.
+The passivation layer protects the underlying structures from contamination and environmental damage.
 
-The final mask, Mask 16, defines the openings through the passivation layer.
+Mask 16 defines openings in the passivation layer to expose the bond pads or other designated terminal regions.
 
-These openings expose the bonding pads and provide access to the electrical terminals of the finished chip.
+These exposed pads provide the electrical interface between the integrated circuit and its external connections.
 
-### Completed CMOS Structure
+**Purpose of this stage:**
 
-The completed device contains the semiconductor substrate, well regions, transistor gates, source and drain regions, local contacts, and metal interconnect layers.
+- Builds the metal interconnect network.
+- Connects transistor terminals and circuit elements.
+- Creates vertical connections between metal layers.
+- Provides a protective passivation layer and openings for external electrical connections.
 
-The metal stack provides electrical access to the transistor terminals, enabling the circuit to operate as a functional integrated circuit.
 
-# Labs
+The fabrication sequence transforms a bare silicon wafer into a CMOS structure containing complementary transistors and the interconnects needed to connect them.
 
-The practical section connects the fabrication and transistor-level theory to the physical design and characterization of a SKY130 CMOS inverter.
+Each stage contributes a specific physical feature to the finished integrated circuit, from the semiconductor regions and gate structures to the contact network and upper metal layers.
 
-The labs cover layout configuration, technology setup, transistor identification, SPICE extraction, model integration, transient simulation, timing measurement, and design-rule inspection.
+---
 
-# Lab 1 — Physical Design Configuration
+## CMOS Inverter: Structure and Operation
 
-Physical design configuration establishes the settings used by the implementation flow.
+### Inverter Structure
 
-The configuration determines how the design is processed through the selected stages of the physical design workflow.
+A CMOS inverter consists of one PMOS transistor and one NMOS transistor.
 
-A flow configuration may include parameters related to floorplanning, pin placement, routing, and execution behavior.
+The PMOS source is connected to the positive supply, VDD, and the NMOS source is connected to ground, VSS or GND.
 
-Changes to configuration variables can affect the way a design is processed. The selected values must remain consistent with the flow version and its supported configuration options.
+Their gates are connected together to form the input. Their drains are connected together to form the output.
 
-# Lab 2 — Setting Up Magic with the SKY130 Standard-Cell Design
+The PMOS transistor provides a path from VDD to the output, while the NMOS transistor provides a path from the output to ground.
 
-## 2.1 Introduction to Magic
+### Circuit Operation
 
-Magic is a VLSI layout editor used to create, inspect, and verify physical circuit layouts.
+**Input LOW (logic 0):**
 
-The tool represents circuit geometry using technology-specific layers. It can display device regions, interconnect shapes, and layout structures according to the selected process design kit.
+- The PMOS transistor is ON.
+- The NMOS transistor is OFF.
+- The output is pulled toward VDD and represents logic 1.
 
-For this module, Magic is used to open and inspect the SKY130 CMOS inverter standard-cell layout.
+**Input HIGH (logic 1):**
 
-## 2.2 SKY130 Standard-Cell Design Repository
+- The PMOS transistor is OFF.
+- The NMOS transistor is ON.
+- The output is pulled toward ground and represents logic 0.
 
-The standard-cell design repository contains the reference inverter layout used for the practical exercises.
+### Truth Table
 
-The reference layout represents a CMOS inverter with:
+| Input A | PMOS | NMOS | Output Y |
+|---|---|---|---|
+| 0 | ON | OFF | 1 |
+| 1 | OFF | ON | 0 |
 
-* PMOS and NMOS transistor regions.
+The Boolean expression for the inverter is:
 
-* Input pin A.
+$$
+Y = \overline{A}
+$$
 
-* Output pin Y.
+### Voltage Transfer and Switching
 
-* Positive supply connection VPWR.
+The inverter's voltage-transfer characteristic describes the relationship between its input voltage and output voltage.
 
-* Ground connection VGND.
+At a low input voltage, the output is near the supply voltage. At a high input voltage, the output is near ground. Between these regions, both devices may conduct during the switching transition.
 
-* Diffusion and interconnect geometry.
+The switching threshold depends on transistor characteristics, device sizing, supply voltage, and process parameters.
 
-## 2.3 Technology File Setup
+The inverter's dynamic response also depends on the load and parasitic capacitances.
 
-Magic requires a compatible technology file to interpret the physical layers and apply the corresponding geometric design rules.
+### Transistor Identification
 
-The SKY130 technology file, `sky130A.tech`, is used to configure the layout environment.
+The PMOS and NMOS devices occupy different semiconductor regions in the physical layout. Their gate, source, and drain connections must correspond to the intended inverter circuit.
 
-The technology file is made available in the working directory so that Magic can load the appropriate layer definitions and technology rules.
+![Identifying the transistors](images/03_identifying_transistors.png)
 
-The reference layout is opened using:
+---
 
-Bash
+## Tools and Technology Files
 
-```
-magic -T sky130A.tech sky130_inv.mag &
-```
+### Magic VLSI Layout Tool
 
-This command launches Magic with the specified technology file and loads the inverter layout.
+Magic is a VLSI layout editor used to create, view, and verify integrated-circuit layouts.
 
-## 2.4 Inverter Layout Inspection
+With a compatible technology file loaded, Magic interprets layout layers and checks geometric constraints according to the selected process rules.
 
-Once the layout is opened, the main circuit features can be examined.
+In this module, Magic is used to:
 
-The power rails, input and output pins, and transistor diffusion regions provide the physical representation of the inverter.
+- Create and edit the CMOS inverter layout.
+- Inspect device regions and interconnect geometry.
+- Examine individual physical layers.
+- Run Design Rule Checks.
+- Extract layout connectivity and parasitic information.
 
-Custom SKY130 CMOS inverter layout
+### SKY130 Process Design Kit (PDK)
 
-Setting up Magic
+A Process Design Kit provides the technology-specific information required to design and verify circuits for a fabrication process.
 
-Copying the SKY130 technology file
+The SKY130 PDK includes layer definitions, design rules, device information, and model files for compatible design and simulation tools.
 
-# Lab 3 — Identifying Transistor Layers
+A consistent PDK and tool configuration is essential because layer names, geometry constraints, device parameters, and model references must match the selected process.
 
-The physical layout contains different semiconductor and interconnect layers that collectively define the CMOS inverter.
+### Technology File
 
-Identifying the transistor regions is important for understanding how the layout corresponds to the circuit schematic.
+The technology file describes how the layout tool interprets the process layers.
 
-## 3.1 NMOS Identification
+It defines layer mappings and technology-specific constraints used during editing and verification.
 
-The NMOS transistor is formed in the appropriate semiconductor region and provides the pull-down path from the output to ground.
+### ngspice
 
-Its physical structure includes the gate, source, drain, and body-related connections.
+ngspice is a SPICE-based circuit simulator. It evaluates electrical behavior using a circuit netlist, device models, sources, and analysis commands.
 
-## 3.2 PMOS Identification
+Transient analysis is used in this module to observe the inverter's output as its input changes with time.
 
-The PMOS transistor is formed in the appropriate well region and provides the pull-up path from the output to the positive supply.
+### OpenLane
 
-Its gate is connected to the same input node as the NMOS gate.
+OpenLane is an automated digital implementation flow that integrates tools for physical design.
 
-## 3.3 Layer Identification in Magic
+Its flow configuration controls the execution of implementation steps and related settings. The OpenLane screenshot in this module documents a flow configuration activity.
 
-Magic provides commands for inspecting the layer beneath a selected point in the layout.
+---
 
-The `what` command can be used in the Magic console to identify the mask layer under the cursor.
+## SKY130 Technology Setup in Magic
 
-By selecting the transistor regions and examining the reported layer information, the NMOS and PMOS regions can be distinguished.
+### Technology Setup
 
-Identifying the transistors
+Before creating a layout, Magic must load the correct technology information.
 
-# Lab 4 — Extracting a SPICE Netlist from the Layout
+The technology setup determines how the tool recognizes layers, displays them, and checks their geometric relationships.
 
-## 4.1 Purpose of Layout Extraction
+An incorrect or missing technology configuration can lead to incorrect layer interpretation or invalid verification results.
 
-Layout extraction converts the physical geometry of an integrated circuit into an electrical representation.
+### Setting Up Magic
 
-The extraction process identifies transistor devices, terminal connections, and the electrical nodes defined by the layout.
+The Magic environment is prepared with the technology configuration required for SKY130 layout work.
 
-It can also include parasitic information associated with the physical geometry.
+![Setting up Magic](images/02_setting_up_magic.png)
 
-The extracted representation can then be converted into a SPICE netlist for electrical simulation.
+### Copying the SKY130 Technology File
 
-## 4.2 Extraction in Magic
+The SKY130 technology file is made available to the layout environment so that Magic can interpret the process layers and apply the corresponding design rules.
 
-After loading the inverter layout, Magic's extraction commands are used to generate the circuit representation.
+![Copying the SKY130 technology file](images/04_copied_sky130a_tech_file.png)
 
-The following commands are used in the extraction workflow:
+---
 
-```
-extract all
-ext2spice cthresh 0 zthresh 0
-ext2spice
-```
+## Custom CMOS Inverter Layout
 
-The commands perform the following functions:
+### Layout Design Concept
 
-* `extract all` extracts the electrical information from the layout.
+A layout represents circuit devices and connections through shapes on physical layers.
 
-* `ext2spice cthresh 0 zthresh 0` configures the extraction-to-SPICE conversion thresholds.
+The CMOS inverter layout must implement the same connectivity as the transistor-level circuit.
 
-* `ext2spice` generates the SPICE netlist from the extracted information.
+The main layout elements include:
 
-The extraction produces files such as:
+- PMOS device region and its well structure.
+- NMOS device region and its substrate or well structure.
+- Shared polysilicon gate connection for the input.
+- Common drain connection for the output.
+- PMOS source connection to VDD.
+- NMOS source connection to ground.
+- Contacts and metal interconnects.
+- Well and substrate connections required by the process.
 
-```
-sky130_inv.ext
-sky130_inv.spice
-```
+### Layout Connectivity
 
-The `.ext` file contains extracted layout information, while the `.spice` file contains the circuit representation used for simulation.
+The PMOS and NMOS gates are connected to the same input net. Their drains are connected to the output net.
 
-## 4.3 Understanding the Extracted Netlist
+The PMOS source is connected to VDD, and the NMOS source is connected to ground.
 
-The generated netlist contains transistor instances, node connections, and device parameters derived from the physical layout.
+Correct connectivity is essential: a layout may look geometrically plausible but still fail to implement the intended circuit if a terminal or interconnect is missing or connected incorrectly.
 
-However, the extracted netlist may refer to transistor devices using internal model names generated by Magic.
+### Custom SKY130 CMOS Inverter Layout
 
-These names may not directly correspond to the subcircuit or model definitions available in the device-model libraries.
+![Custom SKY130 CMOS inverter layout](images/01_custom_sky130_cmos_inverter_layout.png)
 
-The extracted netlist therefore requires inspection before it can be used for simulation.
+---
 
-Creating EXT and SPICE files
+## Physical Layers and Layout Inspection
 
-SKY130 inverter SPICE file
+### Layer-Based Representation
 
-# Lab 5 — Locating the SKY130 Device Models
+A semiconductor layout is divided into layers that correspond to physical structures or fabrication operations.
 
-## 5.1 Importance of Device Models
+The layer stack allows transistors and interconnects to be represented as overlapping and connected geometries.
 
-A transistor model describes the electrical characteristics of a semiconductor device under different operating conditions.
+Common layout-layer categories include:
 
-SPICE uses these models to calculate current, voltage, and switching behavior.
+- **Active/diffusion:** Defines semiconductor regions used for transistor source and drain structures.
+- **Well layers:** Define regions in which devices of a particular type are formed.
+- **Polysilicon or gate layer:** Defines transistor gate structures and, where permitted, gate-level routing.
+- **Contact layers:** Connect device regions or lower-level conductors to interconnect layers.
+- **Metal layers:** Carry electrical signals and supply connections across the layout.
+- **Via layers:** Connect adjacent metal levels.
 
-For accurate circuit characterization, the transistor instances in the netlist must reference compatible device models.
+The exact layer names and permitted geometries are defined by the technology.
 
-## 5.2 SKY130 Model Libraries
+### Polysilicon Geometry
 
-The SKY130 design environment includes device-model libraries that describe the behavior of NMOS and PMOS transistors.
+The gate layer crosses the active region to form the transistor channel.
 
-The short-channel model libraries used in the example include:
+Gate dimensions are important because they influence device behavior, while spacing and enclosure rules support manufacturability.
 
-* `nshort.lib` — NMOS device model library.
+### Metal Interconnect
 
-* `pshort.lib` — PMOS device model library.
+Metal layers connect transistor terminals and route signals through the circuit.
 
-These libraries contain BSIM4-based transistor models used to represent the electrical characteristics of the devices.
+Multiple metal layers support more flexible routing and help manage congestion in larger layouts.
 
-## 5.3 Model Name Identification
+### Metal 3 Layer
 
-The model libraries define the device models referenced by the circuit netlist.
+The Metal 3 view highlights geometry on the third metal interconnect layer.
 
-The model names identified in the example are:
+![Metal 3 layer view](images/22_met3_layer.png)
 
-|
-Device
-
-|
-
-Model name
-
-|
-| --- | --- |
-|
-
-NMOS
-
-|
-
-`nshort_model.0`
-
-|
-|
-
-PMOS
-
-|
-
-`pshort_model.0`
-
-|
-
-The model names must match the definitions available in the model libraries.
-
-The extracted netlist must therefore be aligned with the model names and library structure used by the simulation environment.
-
-# Lab 6 — Correcting the Extracted Netlist and Running ngspice
-
-## 6.1 Initial Simulation Attempt
-
-The first attempt to simulate the extracted netlist may fail if the transistor instances reference model names that are not defined in the simulation environment.
-
-An example error is:
-
-```
-Error: unknown subckt: x0 y a vgnd vgnd pshort_model.0 ...
-```
-
-This type of error indicates that the simulator cannot resolve the referenced device or subcircuit definition.
-
-The extracted netlist must be checked for missing model references, incorrect instance definitions, and incomplete simulation statements.
-
-## 6.2 Correcting the SPICE Deck
-
-The extracted circuit is modified to reference the appropriate SKY130 device-model libraries.
-
-The model libraries are included using statements such as:
-
-spice
-
-```
-.include ./libs/pshort.lib
-.include ./libs/nshort.lib
-```
-
-The inverter is then represented through a suitable subcircuit definition containing the PMOS and NMOS instances.
-
-A typical inverter subcircuit declaration is:
-
-spice
-
-```
-.subckt sky130_inv A Y VPWR VGND
-```
-
-The transistor instances must be connected to the appropriate supply, input, output, and ground nodes.
-
-The corrected netlist also requires:
-
-* A valid input voltage source.
-
-* The supply voltage source.
-
-* Appropriate model references.
-
-* Extracted parasitic capacitances, where applicable.
-
-* A transient-analysis command.
-
-* A control block for simulation and waveform analysis.
-
-## 6.3 Input Pulse Source
-
-A pulse source is used to apply alternating logic levels to the inverter input.
-
-The pulse source determines the timing of the input transitions and provides the stimulus required to observe the inverter's response.
-
-## 6.4 Running the Corrected Netlist
-
-After the netlist is corrected, it can be loaded into ngspice.
-
-The simulator calculates the circuit's response and generates the transient solution.
-
-A successful simulation confirms that the circuit description, model references, and analysis commands are sufficiently consistent for the specified simulation.
-
-Edited SKY130 inverter SPICE file
-
-Running ngspice
-
-# Lab 7 — Transient Analysis and Timing Characterization
-
-## 7.1 Transient Simulation of the CMOS Inverter
-
-Transient analysis is used to study how the inverter responds to a time-varying input signal.
-
-When the input changes from LOW to HIGH, the NMOS transistor turns ON and the PMOS transistor turns OFF. The output is pulled toward ground.
-
-When the input changes from HIGH to LOW, the PMOS transistor turns ON and the NMOS transistor turns OFF. The output is pulled toward the supply voltage.
-
-The output therefore follows the inverse of the input, with finite transition times and propagation delays.
-
-## 7.2 Waveform Analysis
-
-The input and output voltages are plotted against time to observe the switching behavior.
-
-The waveform provides information about:
-
-* Input pulse transitions.
-
-* Output voltage levels.
-
-* Rising and falling output edges.
-
-* Switching intervals.
-
-* The delay between input and output transitions.
-
-The output waveform demonstrates the inverter's logical inversion and its dynamic response.
-
-Transient analysis waveform
-
-## 7.3 Rise Transition Time
-
-Rise transition time measures the time required for the output to move from a low voltage level to a high voltage level.
-
-In the characterization example, the transition time is measured between the 20% and 80% points of the output voltage swing.
-
-tr=t80%−t20%t_r=t_{80\%}-t_{20\%}tr=t80%−t20%
-
-The measurement is performed by identifying the relevant threshold crossings on the rising output edge.
-
-Rise time measurement
-
-## 7.4 Fall Transition Time
-
-Fall transition time measures the time required for the output to move from a high voltage level to a low voltage level.
-
-The transition time is measured between the 80% and 20% points of the voltage swing.
-
-tf=t20%−t80%t_f=t_{20\%}-t_{80\%}tf=t20%−t80%
-
-The measured interval describes the speed at which the output discharges toward ground.
-
-Fall time measurement
-
-## 7.5 Cell Rise Delay
-
-Cell rise delay represents the time difference between the input transition and the corresponding low-to-high output transition.
-
-For a CMOS inverter, the output rises when the input falls.
-
-The delay is measured using the 50% voltage crossing of the input and the corresponding 50% crossing of the output.
-
-tPLH=toutput,50%−tinput,50%t_{PLH}=t_{\text{output,50\%}}-t_{\text{input,50\%}}tPLH=toutput,50%−tinput,50%
-
-This parameter describes the propagation delay associated with the rising output edge.
-
-Cell rise delay
-
-## 7.6 Cell Fall Delay
-
-Cell fall delay represents the time difference between the input transition and the corresponding high-to-low output transition.
-
-For a CMOS inverter, the output falls when the input rises.
-
-The delay is measured between the 50% crossing of the input and the 50% crossing of the output.
-
-tPHL=toutput,50%−tinput,50%t_{PHL}=t_{\text{output,50\%}}-t_{\text{input,50\%}}tPHL=toutput,50%−tinput,50%
-
-This parameter describes the propagation delay associated with the falling output edge.
-
-Cell fall delay
-
-## 7.7 Timing Characterization Results
-
-The transient waveform can be used to measure the transition times and propagation delays of the inverter.
-
-The timing parameters are defined as follows:
-
-|
-Metric
-
-|
-
-Measurement
-
-|
-| --- | --- |
-|
-
-Rise transition time
-
-|
-
-20% to 80% on a rising output edge-0.05954
-
-|
-|
-
-Fall transition time
-
-|
-
-80% to 20% on a falling output edge-0.05965
-
-|
-|
-
-Cell rise delay
-
-|
-
-50% input crossing to 50% output crossing for a rising output-0.05686
-
-|
-|
-
-Cell fall delay
-
-|
-
-50% input crossing to 50% output crossing for a falling output-0.05673
-
-|
-
-The measured values depend on the simulation conditions, transistor models, supply voltage, input pulse, and extracted parasitics.
-
-The screenshots document the timing measurements performed during the characterization process.
-
-# Lab 8 — Exploring the DRC Rule Deck: Metal3 and Poly
-
-## 8.1 Design Rule Checking
-
-Design Rule Checking (DRC) verifies whether the geometric features of a physical layout satisfy the manufacturing constraints defined by the technology.
-
-The rules specify requirements for dimensions and relationships between layout shapes.
-
-Examples include:
-
-* Minimum spacing between adjacent shapes.
-
-* Minimum width of a conductor.
-
-* Minimum area requirements.
-
-* Enclosure and overlap constraints.
-
-* Contact and via dimensions.
-
-DRC helps identify layout geometries that do not comply with the selected technology's rules.
-
-## 8.2 Metal3 Design Rule Inspection
-
-The Metal3 layer is part of the interconnect stack and is used to route electrical connections across the physical layout.
-
-The reference DRC deck includes several Metal3 test structures that demonstrate different geometric configurations.
-
-These structures allow the behavior of the design rules to be examined by comparing permitted and prohibited geometries.
-
-### Metal3 Spacing Rule
-
-The Metal3 spacing rule controls the minimum separation required between adjacent Metal3 shapes.
-
-The example rule condition is:
-
-```
-Metal3 spacing < 0.3um (met3.2)
-```
-
-This condition indicates a violation when the separation between the relevant shapes is below the specified minimum.
-
-### Metal3 Minimum Area Rule
-
-The Metal3 minimum area rule ensures that a metal shape meets the required minimum area.
-
-The example rule condition is:
-
-```
-Metal3 minimum area < 0.24um^2 (met3.6)
-```
-
-This rule identifies Metal3 shapes whose area is below the specified threshold.
-
-Metal3 layer view
-
-## 8.3 Inspecting DRC Violations
-
-The `drc why` command in Magic can be used to identify the rule associated with a flagged region.
-
-The command provides information about the violated constraint, helping connect the geometric error to the relevant technology rule.
-
-This allows the layout to be examined at the specific location where the violation occurs.
-
-DRC error inspection
-
-## 8.4 M3.3C Test Structure Inspection
+### 8.4 M3.3C Test Structure Inspection
 
 The M3.3C test structure contains an arrangement of contact or via cuts within a Metal3 region.
 
@@ -1098,7 +594,7 @@ The structure is examined at a finer zoom level to inspect the individual shapes
 
 The reference example reports a total of 22 DRC violations for the selected structure.
 
-### VIA2 Inspection
+#### VIA2 Inspection
 
 The `paint m3contact` command and `cif see VIA2` command can be used to isolate and inspect the VIA2-related mask geometry.
 
@@ -1106,19 +602,25 @@ The selected contact region can then be examined using the `box` command.
 
 The measured dimensions of the selected structure are:
 
-0.050 μm × 0.130 μm
+$$
+0.050\ \mu m \times 0.130\ \mu m
+$$
 
 The corresponding area is:
 
-A = 0.050 × 0.130
+$$
+A = 0.050 \times 0.130
+$$
 
-A = 0.0065 μm²
+$$
+A = 0.0065\ \mu m^2
+$$
 
 This measurement provides the physical dimensions of the selected contact region.
 
-Zoomed M3.3C test structure
+![Zoomed M3.3C test structure](images/23_m3_3c_test_structure.png)
 
-## 8.5 Poly Layer Inspection
+### 8.5 Poly Layer Inspection
 
 The polysilicon layer defines the gate structures of MOS transistors and may also be used for other permitted layout geometries.
 
@@ -1128,44 +630,413 @@ The selected geometry is examined in the layout to inspect its dimensions and ar
 
 The measured dimensions of the selected geometry are:
 
-0.315 μm × 0.195 μm
+$$
+0.315\ \mu m \times 0.195\ \mu m
+$$
 
 The corresponding area is:
 
-A = 0.315 × 0.195
+$$
+A = 0.315 \times 0.195
+$$
 
-A = 0.061425 μm²
+$$
+A = 0.061425\ \mu m^2
+$$
 
 The shape is identified as Poly.9 in the reference rule deck.
 
 The exact geometric condition associated with the rule depends on the selected technology's design-rule definition.
 
-Poly.9 rule detail
+![Poly.9 rule detail](images/24_poly_9.png)
 
-# OpenLane Flow Configuration
+---
 
-## Flow Reset Variable
+## Design Rule Checking (DRC)
 
-OpenLane is an automated physical design flow used to implement digital circuits through a sequence of design and verification stages.
+### What Is Design Rule Checking?
 
-The flow uses configuration variables to control the execution of selected stages and operations.
+Design Rule Checking verifies whether the geometry of a layout satisfies the manufacturing constraints defined by the process technology.
 
-The configuration activity in this module involves modifying a flow-reset-related variable and running the flow with the updated configuration.
+Rules are established to control dimensions and relationships between shapes. Depending on the layer and process, these may include:
 
-The behavior of the variable depends on the flow version and the configuration settings used in the environment.
+- Minimum width of a shape.
+- Minimum spacing between shapes.
+- Required enclosure of one layer by another.
+- Minimum overlap between layers.
+- Contact and via dimensions.
+- Well, active, and gate geometry restrictions.
 
-OpenLane flow reset variable
-# Conclusion
+### Why DRC Is Important
 
-Module 3 connects the electrical characterization of a CMOS inverter with the semiconductor fabrication process and the practical steps involved in physical design.
+A layout that violates a design rule may be difficult or impossible to manufacture reliably.
 
-The SPICE theory establishes how a transistor-level circuit is represented and how its static and dynamic characteristics can be evaluated. The switching threshold describes the balance between the PMOS and NMOS networks, while transition times and propagation delays quantify the inverter's switching behavior.
+DRC identifies geometric conditions that require investigation before the layout is treated as verified.
 
-The 16-mask fabrication process demonstrates how semiconductor regions, transistor gates, source and drain structures, contacts, and metal interconnects are formed through successive manufacturing operations.
+A DRC-clean result confirms that the checked geometry satisfies the rules applied by the tool. It does not, by itself, prove that the circuit is electrically correct or that every possible manufacturing issue has been eliminated.
 
-The practical labs extend this understanding by using Magic to inspect a SKY130 inverter layout, identify transistor layers, extract a SPICE netlist, locate the required device models, and prepare the circuit for ngspice simulation.
+### Inspecting a DRC Error
 
-Transient analysis provides the basis for measuring rise time, fall time, cell rise delay, and cell fall delay. The DRC exercises demonstrate how physical layout geometries are checked against process-specific spacing and area constraints.
+When a violation is reported, the affected geometry and the associated rule must be examined.
 
-Together, the theory and practical work establish a connection between transistor-level electrical behavior, physical layout geometry, semiconductor manufacturing, and circuit characterization.
+The rule definition explains the required constraint; the layout view helps locate the shape responsible for the violation.
 
+![DRC error inspection](images/11_drc_error.png)
+
+---
+
+## Layout Extraction and SPICE Generation
+
+### Purpose of Layout Extraction
+
+Layout extraction translates physical geometry into an electrical representation.
+
+It identifies devices and connectivity from the shapes and layer relationships in the layout.
+
+Depending on the extraction setup, it can also estimate parasitic resistance and capacitance associated with devices and interconnects. These parasitics can influence transition times and propagation delay.
+
+### Extracted Layout Information
+
+Magic extraction can produce an `.ext` file containing extracted layout information.
+
+The extracted data can be processed into a SPICE-compatible circuit description for simulation.
+
+The extraction setup must be consistent with the technology and the intended simulation flow.
+
+Device recognition, terminal connectivity, and model references should be checked before interpreting simulation results.
+
+### Creating EXT and SPICE Files
+
+![Creating EXT and SPICE files](images/12_creating_ext_and_spice_files.png)
+
+### SKY130 Inverter SPICE File
+
+The generated SPICE representation describes the inverter's electrical connectivity using transistor instances and associated node names.
+
+![SKY130 inverter SPICE file](images/13_sky130_inv_spice_file.png)
+
+### Edited SKY130 Inverter SPICE File
+
+The SPICE file may be edited to align the extracted circuit with the required model references and simulation setup.
+
+The circuit topology and node connections must remain consistent with the intended layout.
+
+![Edited SKY130 inverter SPICE file](images/14_sky130_inv_spice_file_edited.png)
+
+---
+
+## SPICE Deck and Device Models
+
+### What Is a SPICE Deck?
+
+A SPICE deck is a text-based description of a circuit and the instructions used to simulate it.
+
+It contains the circuit elements, device model references, sources, analysis commands, and optional measurement or output directives.
+
+For a CMOS inverter, a SPICE deck commonly includes:
+
+1. NMOS and PMOS transistor instances.
+2. Model definitions or references to model files.
+3. A DC supply source.
+4. An input voltage source, often configured as a pulse.
+5. An output load, if required by the experiment.
+6. Transient analysis settings.
+7. Measurement statements or waveform output commands.
+
+### Device Models
+
+A MOSFET model describes the electrical behavior of a transistor under different terminal voltages and operating conditions.
+
+Model parameters represent characteristics such as threshold behavior, current drive, and parasitic effects.
+
+For meaningful simulation, the model files and device instances must correspond to the intended process and device types.
+
+### SPICE Deck Inspection
+
+The SPICE deck is inspected to verify that the circuit description, model references, source definitions, node connections, and simulation commands are consistent.
+
+![SPICE deck](images/17_spice_deck.png)
+
+---
+
+## Transient Analysis with ngspice
+
+### What Is Transient Analysis?
+
+Transient analysis calculates how voltages and currents change over time.
+
+Unlike a DC operating-point analysis, which evaluates a steady-state condition, transient analysis follows the circuit response to time-varying input signals.
+
+For a CMOS inverter, a changing input voltage causes the output to transition between logic levels.
+
+The output transition is not instantaneous because transistor drive capability and circuit capacitance limit how quickly the output node can charge or discharge.
+
+### Input Pulse
+
+A pulse source can be used to apply repeated low-to-high and high-to-low transitions to the inverter input.
+
+The pulse parameters determine the low and high levels, delay, rise and fall times, pulse width, and repetition period.
+
+### Simulation Procedure
+
+1. Load the SPICE deck into ngspice.
+2. Confirm that the required model files are accessible.
+3. Check the supply and input source definitions.
+4. Set the transient-analysis time interval and simulation step.
+5. Execute the simulation.
+6. Plot the input and output voltages against time.
+7. Inspect the switching transitions and measure timing parameters.
+
+### Running ngspice
+
+![Running ngspice](images/15_running_ngspice.png)
+
+### Transient Analysis Waveform
+
+The transient waveform shows how the inverter output responds to changes in the input.
+
+The output is logically inverted, while the finite transition intervals reveal the circuit's dynamic response.
+
+![Transient analysis waveform](images/16_transient_analysis.png)
+
+---
+
+## Rise Time and Fall Time
+
+### Rise Time
+
+Rise time (\(t_r\)) is the time required for a signal to move from a low voltage level to a high voltage level.
+
+A common convention measures the interval between 10% and 90% of the voltage swing.
+
+For a signal with low level \(V_L\) and high level \(V_H\), the threshold voltages are:
+
+$$
+V_{10\%} = V_L + 0.1(V_H - V_L)
+$$
+
+$$
+V_{90\%} = V_L + 0.9(V_H - V_L)
+$$
+
+The rise time is:
+
+$$
+t_r = t_{90\%} - t_{10\%}
+$$
+
+A shorter rise time represents a faster rising transition under the stated measurement conditions.
+
+### Rise Time Measurement
+
+![Rise time measurement](images/18_rise_time.png)
+
+### Fall Time
+
+Fall time (\(t_f\)) is the time required for a signal to move from a high voltage level to a low voltage level.
+
+A common convention measures the interval between 90% and 10% of the voltage swing.
+
+The fall time is:
+
+$$
+t_f = t_{10\%} - t_{90\%}
+$$
+
+Here, \(t_{90\%}\) is the time at which the falling signal crosses the 90% threshold, and \(t_{10\%}\) is the time at which it crosses the 10% threshold.
+
+The subtraction gives a positive time interval.
+
+A shorter fall time represents a faster falling transition under the stated measurement conditions.
+
+### Fall Time Measurement
+
+![Fall time measurement](images/19_fall_time.png)
+
+### Timing Results
+
+The measured transition times are:
+
+| Parameter | Measured Value |
+|---|---:|
+| Rise Time | 0.05954 |
+| Fall Time | 0.05965 |
+
+**Note:** The values are reproduced as provided. The measurement unit was not specified.
+
+### Factors Affecting Transition Time
+
+Rise and fall times are influenced by:
+
+- Transistor drive strength and sizing.
+- Supply voltage and operating conditions.
+- Output load capacitance.
+- Parasitic capacitance and resistance.
+- Input transition time.
+- Interconnect geometry and extracted parasitics.
+
+Rise and fall times are not necessarily equal because the PMOS and NMOS devices may have different drive strengths and operating characteristics.
+
+---
+
+## Cell Rise Delay and Cell Fall Delay
+
+### Propagation Delay
+
+Propagation delay is the time between a specified input transition and the corresponding output transition.
+
+It represents the time required for a change at the input to produce a measurable change at the output.
+
+For standard timing characterization, the input and output crossing points are often measured at 50% of their respective voltage swings.
+
+The chosen thresholds must be applied consistently.
+
+### Cell Rise Delay
+
+Cell rise delay, commonly represented by \(t_{PLH}\), is the propagation delay associated with the output transition from low to high.
+
+For a CMOS inverter, a low-to-high output transition generally follows a high-to-low input transition.
+
+The PMOS pull-up path charges the output node toward VDD.
+
+The delay depends on the PMOS drive capability, output capacitance, input transition, supply voltage, and parasitic effects.
+
+### Cell Rise Delay Measurement
+
+![Cell rise delay](images/20_cell_rise_delay.png)
+
+### Cell Fall Delay
+
+Cell fall delay, commonly represented by \(t_{PHL}\), is the propagation delay associated with the output transition from high to low.
+
+For a CMOS inverter, a high-to-low output transition generally follows a low-to-high input transition.
+
+The NMOS pull-down path discharges the output node toward ground.
+
+The delay depends on the NMOS drive capability, output capacitance, input transition, supply voltage, and parasitic effects.
+
+### Cell Fall Delay Measurement
+
+![Cell fall delay](images/21_cell_fall_delay.png)
+
+### Propagation Delay Results
+
+The measured cell propagation delays are:
+
+| Parameter | Measured Value |
+|---|---:|
+| Cell Rise Delay | 0.05686 |
+| Cell Fall Delay | 0.05673 |
+
+**Note:** The values are reproduced as provided. The measurement unit was not specified.
+
+### Average Propagation Delay
+
+The average propagation delay is commonly expressed as:
+
+$$
+t_{pd} = \frac{t_{PLH} + t_{PHL}}{2}
+$$
+
+where:
+
+- \(t_{PLH}\) is the low-to-high output propagation delay.
+- \(t_{PHL}\) is the high-to-low output propagation delay.
+
+Propagation delay is distinct from rise time and fall time.
+
+Rise and fall times describe the duration of an output transition, while propagation delay measures the timing offset between the input and output transitions.
+
+---
+
+## OpenLane Flow Configuration
+
+### OpenLane Flow
+
+OpenLane is an automated RTL-to-GDSII implementation flow used in digital physical design.
+
+It coordinates implementation stages and uses configuration settings to control how the flow runs.
+
+Flow variables can influence the behavior of selected stages, resets, and execution settings.
+
+Changes must be consistent with the flow version and configuration format in use.
+
+### Flow Reset Variable
+
+The screenshot documents a change involving an OpenLane flow-reset variable followed by running the flow.
+
+The effect of a configuration change depends on the variable's definition and the selected flow setup.
+
+![OpenLane flow reset variable](images/25_openlane_flow_reset_variable.png)
+
+---
+
+## Results and Observations
+
+The layout and simulation sequence demonstrates how a simple logic cell is represented and evaluated at physical and circuit levels.
+
+- A CMOS inverter uses complementary PMOS and NMOS devices to produce an inverted logic output.
+- The technology file defines how the layout tool interprets the SKY130 layers and design constraints.
+- The physical layout represents transistor regions, gate structures, contacts, and interconnects.
+- Layer inspection helps identify geometry used for device formation and signal routing.
+- DRC checks the layout against the technology's geometric rules.
+- Extraction translates physical geometry into a circuit representation and may include parasitic effects.
+- A SPICE deck connects the circuit representation to device models, voltage sources, and simulation commands.
+- Transient analysis displays the time-domain response of the inverter.
+- Rise time and fall time characterize the speed of output transitions.
+- Cell rise and fall delays characterize the time relationship between input and output transitions.
+- Device sizing, load capacitance, and parasitic resistance and capacitance can influence the measured timing values.
+
+### Layout Inspection Measurements
+
+| Inspection | Dimensions | Area |
+|---|---|---:|
+| M3.3C Test Structure | 0.050 × 0.130 µm | 0.0065 µm² |
+| Poly Layer | 0.315 × 0.195 µm | 0.061425 µm² |
+
+---
+
+## Conclusion
+
+This module presents a structured study of a SKY130 CMOS inverter, beginning with semiconductor fabrication and transistor operation and progressing through technology setup, physical layout, layer inspection, design rule checking, extraction, and SPICE simulation.
+
+The inverter provides a practical example of how circuit connectivity is translated into physical geometry and how that geometry can affect electrical behavior.
+
+Transient analysis and timing measurements illustrate the distinction between output transition time and input-to-output propagation delay.
+
+Together, these topics establish a foundation for understanding standard-cell layout design, physical verification, and circuit characterization in VLSI physical design.
+
+---
+
+## Image Index
+
+All screenshots are stored in the `images/` directory.
+
+| No. | Filename | Description |
+|---:|---|---|
+| 1 | `01_custom_sky130_cmos_inverter_layout.png` | Custom SKY130 CMOS inverter layout |
+| 2 | `02_setting_up_magic.png` | Magic setup |
+| 3 | `03_identifying_transistors.png` | Identifying transistors |
+| 4 | `04_copied_sky130a_tech_file.png` | Copying the SKY130 technology file |
+| 5 | `05_cmos_fabrication_step_02.png` | CMOS fabrication process, step 2 |
+| 6 | `06_cmos_fabrication_step_03.png` | CMOS fabrication process, step 3 |
+| 7 | `07_cmos_fabrication_step_04.png` | CMOS fabrication process, step 4 |
+| 8 | `08_cmos_fabrication_step_05.png` | CMOS fabrication process, step 5 |
+| 9 | `09_cmos_fabrication_step_06.png` | CMOS fabrication process, step 6 |
+| 10 | `10_cmos_fabrication_step_07.png` | CMOS fabrication process, step 7 |
+| 11 | `11_drc_error.png` | DRC error inspection |
+| 12 | `12_creating_ext_and_spice_files.png` | Creating extraction and SPICE files |
+| 13 | `13_sky130_inv_spice_file.png` | SKY130 inverter SPICE file |
+| 14 | `14_sky130_inv_spice_file_edited.png` | Edited SKY130 inverter SPICE file |
+| 15 | `15_running_ngspice.png` | Running ngspice |
+| 16 | `16_transient_analysis.png` | Transient analysis waveform |
+| 17 | `17_spice_deck.png` | SPICE deck |
+| 18 | `18_rise_time.png` | Rise-time measurement |
+| 19 | `19_fall_time.png` | Fall-time measurement |
+| 20 | `20_cell_rise_delay.png` | Cell rise-delay measurement |
+| 21 | `21_cell_fall_delay.png` | Cell fall-delay measurement |
+| 22 | `22_met3_layer.png` | Metal 3 layer view |
+| 23 | `23_m3_3c_test_structure.png` | Zoomed M3.3C test structure |
+| 24 | `24_poly_9.png` | Poly.9 rule detail |
+| 25 | `25_openlane_flow_reset_variable.png` | OpenLane flow reset variable |
+```
