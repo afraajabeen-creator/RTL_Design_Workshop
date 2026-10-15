@@ -1039,17 +1039,13 @@ The summary report provides an overview of the multi-corner timing analysis.
 
 ### 32.1 Introduction
 
-OpenROAD was used to explore the physical-design flow of VSDBabySoC using the SKY130 HD platform.
-
-The flow includes synthesis, floorplanning, placement and routing. Each stage contributes to transforming the synthesized design into a physical implementation.
+The OpenROAD physical-design flow was explored using VSDBabySoC and the SKY130 HD platform. The work includes synthesis, floorplanning, placement and routing.
 
 The design configuration used was:
 
-```text
+```bash
 ./designs/sky130hd/vsdbabysoc/config.mk
 ```
-
-Run the following commands from the OpenROAD flow directory containing this configuration file.
 
 ### 32.2 Synthesis
 
@@ -1061,11 +1057,17 @@ make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk synth
 
 ### 32.3 Floorplanning
 
-Floorplanning establishes the initial physical organisation of the design, including the floorplan area and placement region.
+Floorplanning establishes the initial physical organisation of the design.
 
 ```bash
 make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk floorplan
 ```
+
+The `gui_floorplan` results were inspected to view the floorplan layout and its associated timing information.
+
+![GUI Floorplan — Screenshot 1](images_codespace/gui_floorplan_1.png)
+
+![GUI Floorplan — Screenshot 2](images_codespace/gui_floorplan_2.png)
 
 ### 32.4 Placement
 
@@ -1075,21 +1077,34 @@ Placement assigns physical locations to standard cells within the placement regi
 make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk place
 ```
 
+The `gui_placement` results were inspected to view the placement layout and timing information.
+
+![GUI Placement — Screenshot 1](images_codespace/gui_placement_1.png)
+
+![GUI Placement — Screenshot 2](images_codespace/gui_placement_2.png)
+
 ### 32.5 Routing
 
-Routing connects the placed standard cells using the available metal layers.
+Routing connects the placed standard cells through the available metal layers.
 
 ```bash
 make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk route
 ```
 
-### 32.6 Physical Design Observations
+The `gui_routing` results were inspected to view the routed layout and associated timing information.
 
-- Synthesis generates a technology-mapped gate-level design.
-- Floorplanning establishes the initial physical organisation.
-- Placement assigns locations to standard cells.
-- Routing creates physical connections between cells.
-- The routed design provides physical interconnect information for more detailed timing analysis.
+![GUI Routing — Screenshot 1](images_codespace/gui_routing_1.png)
+
+![GUI Routing — Screenshot 2](images_codespace/gui_routing_2.png)
+
+### 32.6 Observations
+
+- `gui_floorplan` provides a view of the floorplanned design.
+- `gui_placement` provides a view of the placed standard cells.
+- `gui_routing` provides a view of the routed design.
+- The GUI views help connect the physical layout with timing information reported during the flow.
+- The routed design can be used for post-route timing analysis.
+
 
 ---
 
