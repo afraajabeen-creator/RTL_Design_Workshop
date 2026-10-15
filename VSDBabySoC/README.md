@@ -957,11 +957,11 @@ The post-route report recorded maximum-delay violations in five SS corners. The 
 
 **Report — Part 1**
 
-![Codespace SS n40C 1v28 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28.png)
+![Codespace SS n40C 1v28 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28.rpt(1).png)
 
 **Report — Part 2**
 
-![Codespace SS n40C 1v28 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28rpt(2).png)
+![Codespace SS n40C 1v28 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28.rpt(2).png)
 
 #### Corner 2: SS, -40°C, 1.35 V
 
@@ -972,11 +972,11 @@ The post-route report recorded maximum-delay violations in five SS corners. The 
 
 **Report — Part 1**
 
-![Codespace SS n40C 1v35 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35rpt(1).png)
+![Codespace SS n40C 1v35 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35.rpt(1).png)
 
 **Report — Part 2**
 
-![Codespace SS n40C 1v35 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35rpt(2).png)
+![Codespace SS n40C 1v35 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35.rpt(2).png)
 
 #### Corner 3: SS, -40°C, 1.40 V
 
@@ -987,11 +987,11 @@ The post-route report recorded maximum-delay violations in five SS corners. The 
 
 **Report — Part 1**
 
-![Codespace SS n40C 1v40 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40rpt(1).png)
+![Codespace SS n40C 1v40 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40.rpt(1).png)
 
 **Report — Part 2**
 
-![Codespace SS n40C 1v40 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40rpt(2).png)
+![Codespace SS n40C 1v40 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40.rpt(2).png)
 
 #### Corner 4: SS, -40°C, 1.44 V
 
@@ -1002,11 +1002,11 @@ The post-route report recorded maximum-delay violations in five SS corners. The 
 
 **Report — Part 1**
 
-![Codespace SS n40C 1v44 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44rpt(1).png)
+![Codespace SS n40C 1v44 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44.rpt(1).png)
 
 **Report — Part 2**
 
-![Codespace SS n40C 1v44 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44rpt(2).png)
+![Codespace SS n40C 1v44 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44.rpt(2).png)
 
 ### 31.7 Codespace Summary Report
 
