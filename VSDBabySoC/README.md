@@ -709,3 +709,421 @@ The VSDBabySoC experiment extended this understanding to a larger hierarchical d
 The main takeaway is that RTL design is not only about writing code that produces the expected simulation output. It is also necessary to understand how synthesis interprets the RTL, how optimization changes the implementation, how technology libraries influence the mapped hardware, and how the resulting gate-level implementation can be verified.
 
 ---
+
+---
+
+# PART 2 — STATIC TIMING ANALYSIS AND PHYSICAL DESIGN
+
+## 28. Static Timing Analysis Using OpenSTA
+
+### 28.1 Introduction
+
+Static Timing Analysis (STA) evaluates the timing behaviour of a digital circuit without requiring exhaustive functional simulation. It analyses signal propagation delays and checks whether timing paths satisfy the specified timing constraints.
+
+OpenSTA is an open-source static timing analysis tool. In this work, it was used to examine timing paths in VSDBabySoC using SKY130 HD standard-cell timing libraries.
+
+The analysis involves loading the design netlist, timing constraints and libraries, generating timing reports, and evaluating timing behaviour across different Process, Voltage and Temperature (PVT) conditions.
+
+### 28.2 Important Timing Parameters
+
+| Parameter | Description |
+|---|---|
+| Startpoint | Beginning of a timing path |
+| Endpoint | End of a timing path |
+| Arrival time | Time at which a signal reaches the endpoint |
+| Required time | Time by which the signal must arrive |
+| Slack | Difference between required time and arrival time, interpreted according to the timing check |
+| WNS | Worst Negative Slack; the worst reported timing slack |
+| TNS | Total Negative Slack; accumulated negative slack across violating paths |
+
+Positive slack generally indicates that a path meets its timing requirement. Negative slack indicates a timing violation.
+
+### 28.3 OpenSTA Commands
+
+Check whether OpenSTA is available in the VM:
+
+```bash
+which sta
+sta -version
+```
+
+The following command was used to inspect minimum- and maximum-delay timing paths:
+
+```tcl
+report_checks -path_delay min_max -fields {nets cap slew input_pins fanout}
+```
+
+The report provides timing-path details, including net information, capacitance, slew, input pins and fanout.
+
+---
+
+## 29. Static Timing Analysis on VSDBabySoC — VM
+
+### 29.1 Overview
+
+Static Timing Analysis was performed on the synthesized VSDBabySoC design in the virtual machine using OpenSTA and SKY130 HD timing libraries.
+
+This analysis focuses on the pre-route design. The results help identify timing violations and understand how timing behaviour changes across PVT corners.
+
+The VM screenshots are stored in the `images/` directory. The original filenames contain `(report checks)`.
+
+### 29.2 VM Run TCL Script
+
+The following screenshots document the two parts of the VM `run.tcl` file.
+
+**Part 1**
+
+![VM run TCL file part 1](images/run.tcl%20file(1).png)
+
+**Part 2**
+
+![VM run TCL file part 2](images/run.tcl%20file(2).png)
+
+### 29.3 VM Timing Reports — Representative Corners
+
+The VM reports contain two screenshot parts for each selected corner. The filenames below preserve the names shown in your PDF.
+
+#### Corner 1: SS, -40°C, 1.28 V
+
+This corner produced the following pre-route timing results:
+
+| Metric | Value |
+|---|---:|
+| WNS | -62.56 ns |
+| TNS | -13957.59 ns |
+
+**Report checks — Part 1**
+
+![VM SS n40C 1v28 report checks part 1](images/sky130_fd_sc_hd__ss_n40C_1v28%20(report%20checks)-1.png)
+
+**Report checks — Part 2**
+
+![VM SS n40C 1v28 report checks part 2](images/sky130_fd_sc_hd__ss_n40C_1v28%20(report%20checks)-2.png)
+
+#### Corner 2: SS, -40°C, 1.35 V
+
+**Report checks — Part 1**
+
+![VM SS n40C 1v35 report checks part 1](images/sky130_fd_sc_hd__ss_n40C_1v35%20(report%20checks)-1.png)
+
+**Report checks — Part 2**
+
+![VM SS n40C 1v35 report checks part 2](images/sky130_fd_sc_hd__ss_n40C_1v35%20(report%20checks)-2.png)
+
+#### Corner 3: SS, -40°C, 1.44 V
+
+**Report checks — Part 1**
+
+![VM SS n40C 1v44 report checks part 1](images/sky130_fd_sc_hd__ss_n40C_1v44%20(report%20checks)-1.png)
+
+**Report checks — Part 2**
+
+![VM SS n40C 1v44 report checks part 2](images/sky130_fd_sc_hd__ss_n40C_1v44%20(report%20checks)-2.png)
+
+#### Corner 4: SS, 100°C, 1.40 V
+
+**Report checks — Part 1**
+
+![VM SS 100C 1v40 report checks part 1](images/sky130_fd_sc_hd__ss_100C_1v40%20(report%20checks)-1.png)
+
+**Report checks — Part 2**
+
+![VM SS 100C 1v40 report checks part 2](images/sky130_fd_sc_hd__ss_100C_1v40%20(report%20checks)-2.png)
+
+### 29.4 VM WNS and TNS Graphs
+
+The WNS graph helps identify the worst reported slack across the evaluated corners. The TNS graph shows the accumulated negative slack of violating paths.
+
+**VM WNS graph**
+
+![VM WNS graph](images/wns%20graph.png)
+
+**VM TNS graph**
+
+![VM TNS graph](images/tns%20graph.png)
+
+### 29.5 Observations
+
+- The VM analysis examines the synthesized design before routing.
+- The reported timing results vary across the selected timing libraries.
+- The `ss_n40C_1v28` corner shows substantial negative WNS and TNS.
+- WNS and TNS provide complementary information about timing violations.
+- These results belong to the VM pre-route analysis and must be distinguished from the Codespace post-route results.
+
+---
+
+## 30. SKY130 Timing Libraries — PVT Corners
+
+### 30.1 Introduction
+
+Timing libraries provide timing and electrical models for standard cells. These models allow tools to estimate cell delays under specified operating conditions.
+
+PVT stands for:
+
+- **Process:** Manufacturing-process variation.
+- **Voltage:** Supply-voltage condition.
+- **Temperature:** Operating-temperature condition.
+
+Different PVT conditions can produce different cell delays, so analysing multiple corners helps evaluate timing behaviour across operating conditions.
+
+### 30.2 SKY130 HD Timing Libraries
+
+The SKY130 HD timing-library directory was inspected in the VM. The library filenames identify their process corner, temperature and supply-voltage conditions.
+
+The libraries were used as inputs to the timing analysis. The GitHub repository documents the library inspection and analysis results; the complete timing-library files do not need to be uploaded.
+
+### 30.3 Process Corner Categories
+
+| Corner | Description |
+|---|---|
+| FF | Fast-Fast |
+| SS | Slow-Slow |
+| TT | Typical-Typical |
+
+The VM analysis evaluated 16 corners: 6 FF, 8 SS and 2 TT.
+
+---
+
+## 31. PVT Corner-Based STA — Codespace
+
+### 31.1 Overview
+
+A separate multi-corner Static Timing Analysis was performed in Codespace using the VSDBabySoC physical-design environment.
+
+Unlike the VM analysis, the Codespace report evaluates the routed design using OpenROAD and the associated timing constraints.
+
+The analysis covers minimum- and maximum-delay timing behaviour across 16 PVT corners.
+
+The Codespace screenshots are stored in `images_codespace/`. Their filenames use `rpt(1)` and `rpt(2)` for the two parts of each corner report.
+
+### 31.2 Analysis Setup
+
+The Codespace report documents the following files and directories:
+
+| Item | Path |
+|---|---|
+| Routed design database | `results/sky130hd/vsdbabysoc/base/5_route.odb` |
+| Timing constraints | `results/sky130hd/vsdbabysoc/base/5_route.sdc` |
+| Standard-cell timing libraries | `designs/sky130hd/vsdbabysoc/libs/timing/` |
+| PLL timing library | `designs/sky130hd/vsdbabysoc/lib/avsdpll.lib` |
+| DAC timing library | `designs/sky130hd/vsdbabysoc/lib/avsddac.lib` |
+| Report directory | `reports/sta_minmax_16/` |
+| Summary CSV | `reports/sta_minmax_16/minmax_slack_summary.csv` |
+| TCL script | `/tmp/sta_minmax.tcl` |
+
+These paths describe the Codespace analysis environment.
+
+### 31.3 Codespace TCL Scripts
+
+**Additional STA script**
+
+![Codespace STA TCL script](images_codespace/sta_minmax_extra.tcl.png)
+
+### 31.4 Timing Report Commands
+
+The following commands were used to inspect timing paths and report slack metrics:
+
+```tcl
+report_checks -path_delay min_max -fields {nets cap slew input_pins fanout}
+
+report_wns -min
+report_wns -max
+
+report_tns -min
+report_tns -max
+```
+
+Minimum-delay and maximum-delay checks evaluate different timing requirements and must be interpreted separately.
+
+### 31.5 PVT Corner Coverage
+
+| Corner group | Number of corners |
+|---|---:|
+| FF | 6 |
+| SS | 8 |
+| TT | 2 |
+| **Total** | **16** |
+
+### 31.6 Codespace Timing Reports — Four Representative Corners
+
+The post-route report recorded maximum-delay violations in five SS corners. The following four reports show representative results for the corners with the most negative reported WNS values.
+
+#### Corner 1: SS, -40°C, 1.28 V
+
+| Metric | Value |
+|---|---:|
+| WNS | -20.83 ns |
+| TNS | -5815.72 ns |
+
+**Report — Part 1**
+
+![Codespace SS n40C 1v28 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28.png)
+
+**Report — Part 2**
+
+![Codespace SS n40C 1v28 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v28rpt(2).png)
+
+#### Corner 2: SS, -40°C, 1.35 V
+
+| Metric | Value |
+|---|---:|
+| WNS | -10.66 ns |
+| TNS | -2019.57 ns |
+
+**Report — Part 1**
+
+![Codespace SS n40C 1v35 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35rpt(1).png)
+
+**Report — Part 2**
+
+![Codespace SS n40C 1v35 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v35rpt(2).png)
+
+#### Corner 3: SS, -40°C, 1.40 V
+
+| Metric | Value |
+|---|---:|
+| WNS | -6.36 ns |
+| TNS | -762.02 ns |
+
+**Report — Part 1**
+
+![Codespace SS n40C 1v40 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40rpt(1).png)
+
+**Report — Part 2**
+
+![Codespace SS n40C 1v40 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v40rpt(2).png)
+
+#### Corner 4: SS, -40°C, 1.44 V
+
+| Metric | Value |
+|---|---:|
+| WNS | -3.82 ns |
+| TNS | -168.54 ns |
+
+**Report — Part 1**
+
+![Codespace SS n40C 1v44 report part 1](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44rpt(1).png)
+
+**Report — Part 2**
+
+![Codespace SS n40C 1v44 report part 2](images_codespace/sky130_fd_sc_hd__ss_n40C_1v44rpt(2).png)
+
+### 31.7 Codespace Summary Report
+
+The summary report provides an overview of the multi-corner timing analysis.
+
+![Codespace summary report](images_codespace/report.png)
+
+### 31.8 Codespace WNS and TNS Graphs
+
+**Codespace WNS graph**
+
+![Codespace WNS graph](images_codespace/wns%20graph.png)
+
+**Codespace TNS graph**
+
+![Codespace TNS graph](images_codespace/tns%20graph.png)
+
+### 31.9 Observations
+
+- The Codespace analysis evaluates the routed VSDBabySoC design.
+- Five SS corners showed maximum-delay timing violations.
+- The `ss_n40C_1v28` corner produced the most negative reported WNS.
+- WNS indicates the worst reported slack, while TNS represents accumulated negative slack.
+- The VM and Codespace results represent different analysis stages and should not be treated as interchangeable.
+- The full set of corner reports is retained in the repository as supporting evidence.
+
+---
+
+## 32. Physical Design Flow Using OpenROAD
+
+### 32.1 Introduction
+
+OpenROAD was used to explore the physical-design flow of VSDBabySoC using the SKY130 HD platform.
+
+The flow includes synthesis, floorplanning, placement and routing. Each stage contributes to transforming the synthesized design into a physical implementation.
+
+The design configuration used was:
+
+```text
+./designs/sky130hd/vsdbabysoc/config.mk
+```
+
+Run the following commands from the OpenROAD flow directory containing this configuration file.
+
+### 32.2 Synthesis
+
+Synthesis generates a gate-level implementation from the RTL using the selected technology libraries.
+
+```bash
+make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk synth
+```
+
+### 32.3 Floorplanning
+
+Floorplanning establishes the initial physical organisation of the design, including the floorplan area and placement region.
+
+```bash
+make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk floorplan
+```
+
+### 32.4 Placement
+
+Placement assigns physical locations to standard cells within the placement region.
+
+```bash
+make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk place
+```
+
+### 32.5 Routing
+
+Routing connects the placed standard cells using the available metal layers.
+
+```bash
+make DESIGN_CONFIG=./designs/sky130hd/vsdbabysoc/config.mk route
+```
+
+### 32.6 Physical Design Observations
+
+- Synthesis generates a technology-mapped gate-level design.
+- Floorplanning establishes the initial physical organisation.
+- Placement assigns locations to standard cells.
+- Routing creates physical connections between cells.
+- The routed design provides physical interconnect information for more detailed timing analysis.
+
+---
+
+## 33. Key Learning Outcomes — Part 2
+
+This part of the workshop extended the understanding of digital implementation from synthesis to static timing analysis and physical design.
+
+The main concepts studied were:
+
+1. **Static Timing Analysis:** Evaluating timing paths using design constraints and timing libraries.
+2. **OpenSTA:** Using TCL scripts and timing commands to inspect timing paths.
+3. **Timing metrics:** Understanding arrival time, required time, slack, WNS and TNS.
+4. **SKY130 timing libraries:** Understanding timing models for different PVT conditions.
+5. **Multi-corner STA:** Evaluating timing behaviour across 16 PVT corners.
+6. **Pre-route and post-route analysis:** Distinguishing VM results from Codespace routed-design results.
+7. **OpenROAD physical design:** Exploring synthesis, floorplanning, placement and routing.
+8. **Timing violations:** Identifying operating conditions under which maximum-delay timing requirements were not met.
+
+The VM report showed substantial negative slack in the `ss_n40C_1v28` pre-route analysis. The Codespace post-route report also identified five SS corners with maximum-delay violations, with `ss_n40C_1v28.lib` producing the most negative reported WNS.
+
+These results demonstrate the importance of evaluating timing across multiple PVT conditions and interpreting results according to the implementation stage.
+
+---
+
+## 34. Conclusion
+
+This work provided practical experience with the progression from RTL synthesis to static timing analysis and physical design using VSDBabySoC.
+
+The VM OpenSTA analysis was used to inspect pre-route timing paths, while the Codespace analysis evaluated the routed design across 16 PVT corners. The SKY130 timing-library inspection helped explain why timing behaviour varies across operating conditions.
+
+The OpenROAD flow connected timing analysis with physical implementation through synthesis, floorplanning, placement and routing.
+
+Overall, this work demonstrated how timing constraints, standard-cell libraries, PVT conditions and physical implementation influence the timing behaviour of a digital circuit.
+
+---
+
+**Tools and technologies:** VSDBabySoC · Yosys · OpenSTA · OpenROAD · SKY130 HD · TCL · Static Timing Analysis · PVT Corner Analysis
