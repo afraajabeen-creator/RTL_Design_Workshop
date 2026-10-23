@@ -139,24 +139,38 @@ CRC detects many common accidental data-corruption patterns, but it does not enc
 
 ## 3. Design Specifications
 
-| Parameter | Specification |
-|---|---|
-| Project | MeterGuard |
-| Function | Serial CRC frame checking |
-| Hardware description language | Verilog |
-| CRC-8 polynomial | `0x07` |
-| CRC-16 polynomial | `0x1021` |
-| RTL simulation | Icarus Verilog |
-| Waveform viewer | GTKWave |
-| Logic synthesis | Yosys |
-| Static timing analysis | OpenSTA |
-| Physical-design flow | OpenLane |
-| Standard-cell platform | SKY130 |
-| Layout viewer | Magic |
-| Layout database format | GDSII |
+| Parameter                     | Specification                                               |
+| ----------------------------- | ----------------------------------------------------------- |
+| Project                       | MeterGuard                                                  |
+| Function                      | Serial CRC frame checking                                   |
+| Hardware description language | Verilog                                                     |
+| CRC-8 polynomial              | `0x07`                                                      |
+| CRC-16 polynomial             | `0x1021`                                                    |
+| Inputs                        |                                                             |
+| `clk`                         | System clock                                                |
+| `rst_n`                       | Active-low reset; clears the state, counters, and outputs   |
+| `mode`                        | Selects CRC-8 (`0`) or CRC-16 (`1`); latched at frame start |
+| `frame_start`                 | Indicates the beginning of a frame                          |
+| `frame_end`                   | Indicates the end of a frame                                |
+| `data_valid`                  | Indicates that the current input bit is valid               |
+| `data_in`                     | Serial frame data bit, received MSB first                   |
+| Outputs                       |                                                             |
+| `busy`                        | Indicates that a frame is being processed                   |
+| `frame_good`                  | One-clock pulse indicating a valid frame                    |
+| `frame_bad`                   | One-clock pulse indicating an invalid frame                 |
+| `good_cnt[3:0]`               | 4-bit saturating counter for good frames (maximum 15)       |
+| `bad_cnt[3:0]`                | 4-bit saturating counter for bad frames (maximum 15)        |
+| Tools and implementation      |                                                             |
+| RTL simulation                | Icarus Verilog                                              |
+| Waveform viewer               | GTKWave                                                     |
+| Logic synthesis               | Yosys                                                       |
+| Static timing analysis        | OpenSTA                                                     |
+| Physical-design flow          | OpenLane                                                    |
+| Standard-cell platform        | SKY130                                                      |
+| Layout viewer                 | Magic                                                       |
+| Layout database format        | GDSII                                                       |
 
 The polynomial is only one part of a CRC configuration. The initialization value, bit order, final XOR, and other implementation details must also agree between the checker and its testbench.
-
 ---
 
 ## 4. System Architecture
