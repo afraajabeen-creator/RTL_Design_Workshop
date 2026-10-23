@@ -1,4 +1,4 @@
-# MeterGuard — Smart Meter Communication Integrity Checker
+# MeterGuard: A Dual-Mode CRC Data-Integrity Checker with Frame Statistics for Smart Electricity Meter Communication
 
 ### Verilog RTL to GDSII | CRC-8 and CRC-16 | SKY130 | OpenLane
 
