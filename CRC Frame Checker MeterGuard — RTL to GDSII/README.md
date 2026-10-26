@@ -330,7 +330,7 @@ I used simulation and waveform inspection to examine corrupted-frame behavior an
 
 ### 8.1 Corrupted-frame behavior
 
-![Corrupted-frame waveform](images/02_wave_bad_frame%20(zoom%20~3300-3500%20ns).png)
+![Corrupted-frame waveform](images/02_wave_bad_frame%20%28zoom%20~3300-3500%20ns%29.png)
 
 *Figure 3: Zoomed waveform covering the bad-frame test interval.*
 
@@ -340,7 +340,7 @@ Waveform inspection helps connect the applied stimulus to the resulting signal b
 
 ### 8.2 Reset and idle behavior
 
-![Reset and idle waveform](images/03_wave_reset_idle%20(0-200%20ns).png)
+![Reset and idle waveform](images/03_wave_reset_idle%20%280-200%20ns%29.png)
 
 *Figure 4: Waveform covering the initial reset and idle interval.*
 
@@ -647,7 +647,7 @@ The repository contains both an earlier LVS mismatch screenshot and a combined s
 
 ### 17.1 Combined signoff results
 
-![Combined signoff results](images/signoff%20(all%20three%20together).png)
+![Combined signoff results](images/signoff%20%28all%20three%20together%29.png)
 
 *Figure 25: Combined physical-verification evidence.*
 
