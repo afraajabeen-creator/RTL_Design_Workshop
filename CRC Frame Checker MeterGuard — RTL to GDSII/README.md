@@ -229,39 +229,17 @@ This diagram explains the intended function at a high level. The actual control 
 The repository is organized into separate areas for design, verification, simulation, synthesis, timing analysis, and visual evidence.
 
 ```text
-CRC Frame Checker MeterGuard — RTL to GDSII/
-├── README.md
-├── FINAL_PROJECT_VIDEO_DOCUMENTATION/
-│   └── README.md
+RTL_Design_Workshop/
 ├── rtl/
-│   ├── crc_dual.v
-│   └── crc_frame_checker.v
 ├── testbench/
-│   ├── tb_crc_frame_checker.v
-│   └── tb_meterguard_demo.v
 ├── simulation/
-│   ├── crc_frame_checker.vcd
-│   ├── meterguard_demo.vcd
-│   ├── tb_crc_frame_checker.v
-│   └── tb_meterguard_demo.v
 ├── synthesis/
-│   ├── crc_dual.v
-│   ├── crc_frame_checker.v
-│   ├── crc_frame_checker_net.v
-│   ├── synth.log
-│   └── synth.ys
 ├── sta/
-│   ├── crc_frame_checker.sdc
-│   ├── crc_frame_checker_10ns.sdc
-│   ├── sta_corner.tcl
-│   ├── sta_post.tcl
-│   ├── summary.csv
-│   └── [PVT-corner timing reports]
-└── images/
-    └── simulation, synthesis, timing, layout, and signoff screenshots
+├── images/
+└── README.md
 ```
 
-This tree reflects the folders and filenames present in the repository. The bracketed PVT-corner report entry is a grouping label for the individual report files, not a literal filename.
+The tree above summarizes the folders identified for the project. Refer to the repository for the exact filenames contained in each folder.
 
 ### Images included in the repository
 
@@ -330,7 +308,7 @@ I used simulation and waveform inspection to examine corrupted-frame behavior an
 
 ### 8.1 Corrupted-frame behavior
 
-![Corrupted-frame waveform](images/02_wave_bad_frame%20%28zoom%20~3300-3500%20ns%29.png)
+![Corrupted-frame waveform](images/02_wave_bad_frame%20(zoom%20~3300-3500%20ns).png)
 
 *Figure 3: Zoomed waveform covering the bad-frame test interval.*
 
@@ -340,7 +318,7 @@ Waveform inspection helps connect the applied stimulus to the resulting signal b
 
 ### 8.2 Reset and idle behavior
 
-![Reset and idle waveform](images/03_wave_reset_idle%20%280-200%20ns%29.png)
+![Reset and idle waveform](images/03_wave_reset_idle%20(0-200%20ns).png)
 
 *Figure 4: Waveform covering the initial reset and idle interval.*
 
@@ -512,7 +490,7 @@ These values indicate that the initial setup timing target was not met at that c
 
 *Figure 11: Timing report used to investigate the failing corner.*
 
-I examined the failing-corner report to investigate the timing problem. The recorded critical setup path starts at `core.crc[10]`, passes through five logic gates, and ends at flop `_145_`. The report records an arrival time of `10.74 ns` and a required time of `8.11 ns`, giving the reported setup slack of `−2.64 ns`. The initial report also shows a reset-removal issue with `−0.54 ns` slack; the library removal requirement was `2.34 ns` while the recorded arrival was `2.00 ns`.
+I examined the failing-corner report to investigate the timing problem and understand where the initial constraints were not being met.
 
 ### 13.2 Evaluation with an updated clock constraint
 
@@ -555,7 +533,7 @@ This image documents the configuration used for the physical-design flow.
 
 *Figure 14: Recorded physical-design flow metrics.*
 
-The flow-metrics screenshot provides a summary of the implementation information reported by the run. The recorded OpenLane run used a `100 µm × 100 µm` die area and a target placement density of `0.5`. Its synthesis reported `119 cells`; this is a separate run from the standalone Yosys synthesis reported above (`99 cells`). During physical design, the recorded clock-tree synthesis had `29` sinks and `7` clock buffers. The global-route violation count was `0`. The final route report recorded `0` TritonRoute violations, approximately `3,436 µm` total wire length, and `942` vias. These are implementation metrics from the recorded flow, not evidence that timing closed at every corner.
+The flow-metrics screenshot provides a summary of the implementation information reported by the run. Individual values should be interpreted according to the metric names and the corresponding run.
 
 ---
 
@@ -647,7 +625,7 @@ The repository contains both an earlier LVS mismatch screenshot and a combined s
 
 ### 17.1 Combined signoff results
 
-![Combined signoff results](images/signoff%20%28all%20three%20together%29.png)
+![Combined signoff results](images/signoff%20(all%20three%20together).png)
 
 *Figure 25: Combined physical-verification evidence.*
 
@@ -694,11 +672,7 @@ The table below summarizes the recorded results from the different project stage
 | Failing corner | `ss_n40C_1v28` |
 | Initial failing-corner setup slack | −2.64 ns |
 | Initial failing-corner setup TNS | −14.50 ns |
-| Timing investigation | 15 ns clock and 3 ns reset-release assumption recorded; this does not itself prove timing closure |
-| Post-route worst setup slack | −19.11 ns at `ss_n40C_1v28` |
-| Post-route worst hold slack | +0.08 ns at `ff_n40C_1v95` |
-| Post-route setup failures | `ss_n40C_1v28`, `ss_n40C_1v35`, `ss_n40C_1v40`, `ss_n40C_1v44` |
-| Final routing | 0 TritonRoute violations; 3,436 µm total wire length; 942 vias |
+| Timing investigation | 15 ns clock and 3 ns reset-release assumption recorded |
 | Physical verification | Second-run DRC=0, LVS=0 errors, antenna=0 |
 
 The standalone Yosys synthesis figures and OpenLane synthesis results refer to different implementation stages and should not be treated as identical measurements.
@@ -709,13 +683,7 @@ The standalone Yosys synthesis figures and OpenLane synthesis results refer to d
 
 *Figure 27: Post-route static timing analysis results.*
 
-Post-route STA evaluates timing with extracted interconnect parasitics included according to the analysis setup. The recorded post-route results show that timing closure was **not achieved at every evaluated corner**:
-
-- Worst setup slack: `−19.11 ns` at `ss_n40C_1v28`.
-- Worst hold slack: `+0.08 ns` at `ff_n40C_1v95`.
-- Setup timing failed at `ss_n40C_1v28`, `ss_n40C_1v35`, `ss_n40C_1v40`, and `ss_n40C_1v44`.
-
-The worst post-route setup result is substantially worse than the initial pre-route result at `ss_n40C_1v28`. The available reports show this change, but do not by themselves establish a single root cause. Passing DRC, LVS, and antenna checks does not mean that setup timing has passed.
+Post-route STA evaluates timing with parasitic effects from the physical implementation included according to the analysis setup.
 
 ### Pre-route and post-route comparison
 
